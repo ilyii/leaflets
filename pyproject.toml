@@ -9,5 +9,6 @@ dependencies = [
     "jupyter>=1.1.1",
     "pandas>=2.2.3",
     "pillow>=10.4.0",
+    "pyyaml>=6.0.2",
     "tqdm>=4.66.5",
 ]

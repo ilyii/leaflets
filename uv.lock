@@ -686,6 +686,7 @@ dependencies = [
     { name = "jupyter" },
     { name = "pandas" },
     { name = "pillow" },
+    { name = "pyyaml" },
     { name = "tqdm" },
 ]
 
@@ -695,6 +696,7 @@ requires-dist = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pillow", specifier = ">=10.4.0" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "tqdm", specifier = ">=4.66.5" },
 ]
 

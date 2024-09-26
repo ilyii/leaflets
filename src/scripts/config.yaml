@@ -1,0 +1,32 @@
+output_dir: downloaded_leaflets
+
+# Because some shitty supermarkets have special names
+# name in button != name in image url
+unique_names:
+  aldi-sy-d: aldi-sud
+  aldi-sy-d-wein: aldi-sud
+  denns-biomarkt: denn-s-biomarkt
+
+to_mask:
+  - hitbbq
+  - lidlconnect
+
+workers:
+  process: 10
+  download: 20
+
+markets:
+  - https://www.prospektangebote.de/geschaefte/rewe/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/hit/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/edeka/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/aldi-sud/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/aldi-nord/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/rossmann/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/lidl/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/netto-marken-discount/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/norma/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/penny/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/kaufland/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/cap-markt/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/denn-s-biomarkt/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/globus/prospekte-angebote
