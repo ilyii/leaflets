@@ -1,7 +1,6 @@
-### Results
-
-| Model        | mAP 50-95         | mAP 50            | mAP 75            |
-|--------------|-------------------|-------------------|-------------------|
-| YOLOv8n      | 0.5744            | 0.7636            | 0.6633            |
-| **YOLOv8s**  | 0.6433            | 0.8356            | 0.7488            |
-| YOLOv8m      | 0.6341            | 0.8159            | 0.7147            |
+```bash
+uv venv
+.venv/Scripts/activate
+uv sync
+uv run src/scripts/crawling.py
+```

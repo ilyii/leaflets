@@ -7,6 +7,16 @@ __pycache__/
 data/
 *.pt
 *.pth
+flyers/
+
+
+
+
+
+
+
+
+
 # C extensions
 *.so
 
