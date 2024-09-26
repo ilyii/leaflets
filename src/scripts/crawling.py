@@ -56,6 +56,15 @@ class leafletDownloader:
         name = name.lower().strip().replace("-", "").replace(" ", "")
         name = name.replace("ä", "a").replace("ö", "o").replace("ü", "u").replace("ß", "ss")
         name = name.replace("Ä", "A").replace("Ö", "O").replace("Ü", "U")
+        name = name.replace("é", "e").replace("è", "e").replace("ê", "e")
+        name = name.replace("à", "a").replace("â", "a").replace("ç", "c")
+        name = name.replace("í", "i").replace("ì", "i").replace("î", "i")
+        name = name.replace("ó", "o").replace("ò", "o").replace("ô", "o")
+        name = name.replace("ú", "u").replace("ù", "u").replace("û", "u")
+        name = name.replace("ñ", "n").replace("ý", "y").replace("ÿ", "y")
+        name = name.replace("ă", "a").replace("â", "a").replace("î", "i")
+        name = name.replace("ș", "s").replace("ț", "t")
+        name = name.replace("ae", "a").replace("oe", "o").replace("ue", "u")
         return name
 
     @staticmethod
@@ -174,14 +183,18 @@ class leafletDownloader:
             return
 
         for page in range(1, num_pages + 1):
-            image_url = rf"https://img.offers-cdn.net/assets/uploads/flyers/{leaflet_id}/largeWebP/{supermarket_name}-{page}-1.webp"
+            image_url = rf"https://img.offers-cdn.net/assets/uploads/flyers/{leaflet_id}/largeWebP/{supermarket_name}-{page}-$$$x$$$.webp"
             #              https://img.offers-cdn.net/assets/uploads/flyers/2429386/largeWebP/globus-1-1.webp
             _image_name = image_name.format(supermarket_name=supermarket_name, leaflet_id=leaflet_id, page=page)
             save_path = os.path.join(save_dir, _image_name)
 
             if not os.path.exists(save_path):
                 try:
-                    response = self.session.get(image_url, timeout=10)
+                    first_url = image_url.replace("$$$x$$$", "1")
+                    response = self.session.get(first_url, timeout=10)
+                    if response.status_code != 200:
+                        second_url = image_url.replace("$$$x$$$", "2")
+                        response = self.session.get(second_url, timeout=10)
                     response.raise_for_status()
 
                     # Open the WebP image

@@ -6,6 +6,7 @@ unique_names:
   aldi-sy-d: aldi-sud
   aldi-sy-d-wein: aldi-sud
   denns-biomarkt: denn-s-biomarkt
+  getry-nkeland: getraenkeland
 
 to_mask:
   - hitbbq
@@ -19,6 +20,7 @@ markets:
   - https://www.prospektangebote.de/geschaefte/rewe/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/hit/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/edeka/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/e-center/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/aldi-sud/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/aldi-nord/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/rossmann/prospekte-angebote
@@ -30,3 +32,8 @@ markets:
   - https://www.prospektangebote.de/geschaefte/cap-markt/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/denn-s-biomarkt/prospekte-angebote
   - https://www.prospektangebote.de/geschaefte/globus/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/metro/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/nahkauf/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/getraenkeland/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/budni/prospekte-angebote
+  - https://www.prospektangebote.de/geschaefte/tegut/prospekte-angebote
