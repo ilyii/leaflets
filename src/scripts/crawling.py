@@ -20,6 +20,7 @@ PROJECT_DIR = os.path.normpath(os.getenv("PROJECT_DIR"))
 TARGET_DIR = os.path.join(PROJECT_DIR, "crawled_leaflets")
 METADATA_PATH = os.path.join(TARGET_DIR, "metadata.csv")
 METADATA_COLUMNS = ["supermarket_name", "leaflet_id", "num_pages", "crawl_date"]
+CRAWL_DATE = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
 
 # Remove the default console logger
 logging.remove()
@@ -96,8 +97,22 @@ class leafletDownloader:
         :return: Metadata DataFrame
         """
         if os.path.exists(METADATA_PATH):
-            return pd.read_csv(METADATA_PATH)
-        return pd.DataFrame(columns=METADATA_COLUMNS)
+            df = pd.read_csv(METADATA_PATH)
+
+            # convert the crawl_date column to datetime
+            df['crawl_date'] = pd.to_datetime(df['crawl_date'])
+
+            # convert the num_pages and downloaded_pages columns to int
+            df['num_pages'] = df['num_pages'].astype(int)
+            df['downloaded_pages'] = df['downloaded_pages'].astype(int)
+
+            # convert the supermarket_name and leaflet_id columns to string
+            df['supermarket_name'] = df['supermarket_name'].astype(str)
+            df['leaflet_id'] = df['leaflet_id'].astype(str)
+
+            return df
+        else:
+            return pd.DataFrame(columns=METADATA_COLUMNS)
 
     @staticmethod
     def mask_name(name, to_mask):
@@ -114,20 +129,24 @@ class leafletDownloader:
     def update_metadata(self, downloaded_leaflets):
         new_metadata = []
         for leaflet in downloaded_leaflets:
-            supermarket_name = leaflet['hidden_supermarket_name']
-            leaflet_id = leaflet['leaflet_id']
-            num_pages = leaflet['num_pages']
-            downloaded_pages = leaflet['downloaded_pages']
+            supermarket_name = str(leaflet['hidden_supermarket_name'])
+            leaflet_id = str(leaflet['leaflet_id'])
+            num_pages = int(leaflet['num_pages'])
+            downloaded_pages = int(leaflet['downloaded_pages'])
 
             # Check if the leaflet is already in the metadata
-            if not ((self.metadata_df['supermarket_name'] == supermarket_name) &
-                    (self.metadata_df['leaflet_id'] == leaflet_id)).any():
+            existing_leaflet = self.metadata_df[
+                (self.metadata_df['supermarket_name'] == supermarket_name) &
+                (self.metadata_df['leaflet_id'] == leaflet_id)
+            ]
+
+            if len(existing_leaflet) <= 0:
                 new_metadata.append({
                     'supermarket_name': str(supermarket_name),
                     'leaflet_id': str(leaflet_id),
                     'num_pages': int(num_pages),
                     'downloaded_pages': int(downloaded_pages),
-                    'crawl_date': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+                    'crawl_date': CRAWL_DATE
                 })
 
         # Add new metadata to the DataFrame
