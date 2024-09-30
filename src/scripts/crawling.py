@@ -19,7 +19,7 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.normpath(os.getenv("PROJECT_DIR"))
 TARGET_DIR = os.path.join(PROJECT_DIR, "crawled_leaflets")
 METADATA_PATH = os.path.join(TARGET_DIR, "metadata.csv")
-METADATA_COLUMNS = ["supermarket_name", "leaflet_id", "num_pages", "crawl_date"]
+METADATA_COLUMNS = ["supermarket_name", "leaflet_id", "num_pages", "downloaded_pages", "crawl_date"]
 CRAWL_DATE = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
 
 # Remove the default console logger
