@@ -1,5 +1,3 @@
-output_dir: downloaded_leaflets
-
 # Because some shitty supermarkets have special names
 # name in button != name in image url
 unique_names:
@@ -8,6 +6,7 @@ unique_names:
   denns-biomarkt: denn-s-biomarkt
   getry-nkeland: getraenkeland
 
+# some special leaflets which we don't want to download
 to_mask:
   - hitbbq
   - lidlconnect

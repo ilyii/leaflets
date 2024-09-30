@@ -1,5 +1,5 @@
 import concurrent.futures
-import logging
+from loguru import logger as logging
 import os
 import re
 from collections import defaultdict
@@ -10,22 +10,22 @@ from PIL import Image
 from tqdm import tqdm
 import io
 import yaml
+import pandas as pd
+from dotenv import load_dotenv
 
-cur_dir = os.path.dirname(os.path.realpath(__file__))
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    filename="leaflet_downloader.log",
-    filemode="a",
-)
+load_dotenv()
 
-# Create a console handler for ERROR messages only
-console = logging.StreamHandler()
-console.setLevel(logging.ERROR)
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-console.setFormatter(formatter)
-logging.getLogger("").addHandler(console)
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
+PROJECT_DIR = os.path.normpath(os.getenv("PROJECT_DIR"))
+TARGET_DIR = os.path.join(PROJECT_DIR, "crawled_leaflets")
+METADATA_PATH = os.path.join(TARGET_DIR, "metadata.csv")
+METADATA_COLUMNS = ["supermarket_name", "leaflet_id", "num_pages", "crawl_date"]
+
+# Remove the default console logger
+logging.remove()
+
+# Set up logging only to a file
+logging.add(os.path.join(CUR_DIR, "crawling.log"), level="DEBUG", rotation="1 MB")
 
 
 class leafletDownloader:
@@ -36,6 +36,7 @@ class leafletDownloader:
         :param config_file: Path to the YAML configuration file
         """
         self.config = self.load_config(config_file)
+        self.metadata_df = self.load_metadata()
         self.leaflet_url = r"https://www.prospektangebote.de{leaflet_href}"
         self.leaflet_ids = defaultdict(list)
         self.session = requests.Session()
@@ -44,6 +45,15 @@ class leafletDownloader:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
         )
+
+        logging.info("Initialized leafletDownloader")
+        logging.info(f"Current directory: {CUR_DIR}")
+        logging.info(f"Project directory: {PROJECT_DIR}")
+        logging.info(f"Target directory: {TARGET_DIR}")
+        logging.info(f"Unique names: {self.config['unique_names']}")
+        logging.info(f"Names to mask: {self.config['to_mask']}")
+        logging.info(f"Workers: {self.config['workers']}")
+        logging.info(f"Markets: {self.config['markets']}")
 
     @staticmethod
     def parse_name(name):
@@ -79,6 +89,17 @@ class leafletDownloader:
             return yaml.safe_load(f)
 
     @staticmethod
+    def load_metadata():
+        """
+        Load metadata from CSV file.
+
+        :return: Metadata DataFrame
+        """
+        if os.path.exists(METADATA_PATH):
+            return pd.read_csv(METADATA_PATH)
+        return pd.DataFrame(columns=METADATA_COLUMNS)
+
+    @staticmethod
     def mask_name(name, to_mask):
         """
         Mask specific names in the string.
@@ -89,6 +110,34 @@ class leafletDownloader:
         for mask in to_mask:
             name = name.replace(mask, "<MASK>")
         return name
+
+    def update_metadata(self, downloaded_leaflets):
+        new_metadata = []
+        for leaflet in downloaded_leaflets:
+            supermarket_name = leaflet['hidden_supermarket_name']
+            leaflet_id = leaflet['leaflet_id']
+            num_pages = leaflet['num_pages']
+            downloaded_pages = leaflet['downloaded_pages']
+
+            # Check if the leaflet is already in the metadata
+            if not ((self.metadata_df['supermarket_name'] == supermarket_name) &
+                    (self.metadata_df['leaflet_id'] == leaflet_id)).any():
+                new_metadata.append({
+                    'supermarket_name': str(supermarket_name),
+                    'leaflet_id': str(leaflet_id),
+                    'num_pages': int(num_pages),
+                    'downloaded_pages': int(downloaded_pages),
+                    'crawl_date': pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+                })
+
+        # Add new metadata to the DataFrame
+        if new_metadata:
+            new_df = pd.DataFrame(new_metadata)
+            self.metadata_df = pd.concat([self.metadata_df, new_df], ignore_index=True)
+
+        # Save the updated metadata
+        self.metadata_df.to_csv(METADATA_PATH, index=False)
+        logging.info(f"Metadata updated and saved to {METADATA_PATH}")
 
     def load_markets(self):
         """
@@ -103,7 +152,9 @@ class leafletDownloader:
         Process a single market URL to extract leaflet information.
 
         :param market: Market URL to process
+        :return: List of dictionaries containing leaflet information
         """
+        leaflets = []
         try:
             supermarket_name = (
                 re.search(
@@ -144,43 +195,41 @@ class leafletDownloader:
 
                     leaflet_pages = re.search(r"let flyerPages = (.+);", leaflet_response.text)
                     if leaflet_pages:
-                        leaflet_pages = leaflet_pages.group(1).replace("\/", "/")
+                        leaflet_pages = leaflet_pages.group(1).replace(r"\/", "/")
                         leaflet_pages = eval(leaflet_pages)
                         num_pages = len(leaflet_pages)
 
-                        self.leaflet_ids[supermarket_name].append(
-                            {
-                                "hidden_supermarket_name": hidden_supermarket_name,
-                                "leaflet_id": leaflet_id,
-                                "leaflet_href": leaflet_href,
-                                "leaflet_url": this_leaflet_url,
-                                "num_pages": num_pages,
-                            }
-                        )
+                        leaflets.append({
+                            "supermarket_name": supermarket_name,
+                            "hidden_supermarket_name": hidden_supermarket_name,
+                            "leaflet_id": leaflet_id,
+                            "leaflet_href": leaflet_href,
+                            "leaflet_url": this_leaflet_url,
+                            "num_pages": num_pages,
+                        })
+
         except Exception as e:
             logging.error(f"Error processing market {market}: {str(e)}")
+
+        return leaflets
 
     def download_leaflet(self, leaflet_info):
         """
         Download leaflet images for a single leaflet.
 
         :param leaflet_info: Dictionary containing leaflet information
+        :return: Dictionary with leaflet info and number of downloaded pages
         """
         supermarket_name = leaflet_info["hidden_supermarket_name"]
         leaflet_id = leaflet_info["leaflet_id"]
         num_pages = leaflet_info["num_pages"]
 
-        out_dir = self.config["output_dir"]
-
-        save_dir = os.path.join(out_dir, supermarket_name, leaflet_id)
+        save_dir = os.path.join(TARGET_DIR, supermarket_name, leaflet_id)
         os.makedirs(save_dir, exist_ok=True)
 
         image_name = r"{supermarket_name}_{leaflet_id}_{page}.jpg"
 
-        # Check if the leaflet is already fully downloaded
-        if self.is_leaflet_complete(save_dir, num_pages):
-            logging.info(f"leaflet {leaflet_id} for {supermarket_name} is already complete. Skipping.")
-            return
+        downloaded_pages = 0
 
         for page in range(1, num_pages + 1):
             image_url = rf"https://img.offers-cdn.net/assets/uploads/flyers/{leaflet_id}/largeWebP/{supermarket_name}-{page}-$$$x$$$.webp"
@@ -202,13 +251,18 @@ class leafletDownloader:
 
                     # Save as JPG
                     img = img.convert("RGB")  # Convert to RGB mode if it's not already
-                    img.save(save_path, "JPEG", quality=100)
+                    img.save(save_path, "JPEG", quality=95)
+
+                    if os.path.exists(save_path):
+                        downloaded_pages += 1
 
                     logging.info(f"Downloaded and converted {save_path}")
                 except Exception as e:
                     logging.error(f"Error downloading or converting {image_url}: {str(e)}")
             else:
                 logging.info(f"Image {save_path} already exists. Skipping.")
+
+        return {**leaflet_info, "downloaded_pages": downloaded_pages}
 
     def is_leaflet_complete(self, save_dir, num_pages):
         """
@@ -231,12 +285,14 @@ class leafletDownloader:
 
         # Process markets concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config["workers"]["process"]) as executor:
-            list(tqdm(executor.map(self.process_market, markets), total=len(markets), desc="Processing markets"))
+            all_leaflets = list(tqdm(executor.map(self.process_market, markets), total=len(markets), desc="Processing markets"))
+
+        # Flatten the list of leaflets
+        leaflets_to_download = [leaflet for market_leaflets in all_leaflets for leaflet in market_leaflets]
 
         # Download leaflets concurrently
-        leaflets_to_download = [leaflet for leaflets in self.leaflet_ids.values() for leaflet in leaflets]
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config["workers"]["download"]) as executor:
-            list(
+            downloaded_leaflets = list(
                 tqdm(
                     executor.map(self.download_leaflet, leaflets_to_download),
                     total=len(leaflets_to_download),
@@ -244,7 +300,10 @@ class leafletDownloader:
                 )
             )
 
+        # Update and save metadata after all downloads are complete
+        self.update_metadata(downloaded_leaflets)
+
 
 if __name__ == "__main__":
-    downloader = leafletDownloader(os.path.join(cur_dir, "config.yaml"))
+    downloader = leafletDownloader(os.path.join(CUR_DIR, "config.yaml"))
     downloader.run()
