@@ -1,0 +1,8 @@
+train: F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\train_1_Gabriel_10102024
+val: F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\val_1_Gabriel_10102024
+
+names:
+    0: Coupon
+    1: Deal
+    2: Product_Category_Deal
+    3: Sonstiges
