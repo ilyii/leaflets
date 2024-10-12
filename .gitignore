@@ -9,6 +9,7 @@ data/
 *.pth
 flyers/
 downloaded_leaflets/
+runs/
 
 
 

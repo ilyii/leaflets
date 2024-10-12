@@ -1,4 +1,8 @@
-train: F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\train_1_Gabriel_10102024
+train:
+    - F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\train_1_Gabriel_10102024
+    - F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\2_Ilyi_10102024
+    - F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\3_Gabriel_11102024
+    - F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\4_Gabriel_11102024
 val: F:\OneDrive\toShare\Gabrilyi\leaflet_project\labeled\val_1_Gabriel_10102024
 
 names:

@@ -1,15 +1,48 @@
 import os
 import re
 import argparse
+import shutil
+
+PROJECT_DIR = os.getenv('PROJECT_DIR')
+LABELSTUDIO_DIR = os.path.join(PROJECT_DIR, 'mydata', 'media', 'upload')
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert boxes to polygons')
     parser.add_argument('--input', type=str, help='Path to the input directory (containing images and labels)')
     return parser.parse_args()
 
+def copy_images(args):
+    data_dir = os.path.join(args.input, 'labels', 'upload')
+    data_dir_name = os.listdir(data_dir)[0]
+    all_labels = os.path.join(data_dir, data_dir_name)
+    all_labels = os.listdir(all_labels)
+
+    for label in all_labels:
+        old_path = os.path.join(data_dir, data_dir_name, label)
+        new_path = os.path.join(args.input, 'labels', label)
+
+        shutil.copy(old_path, new_path)
+
+    shutil.rmtree(os.path.join(args.input, 'labels', 'upload'))
+
+    all_images = os.path.join(LABELSTUDIO_DIR, data_dir_name)
+    all_images = os.listdir(all_images)
+
+    for image in all_images:
+        old_path = os.path.join(LABELSTUDIO_DIR, data_dir_name, image)
+        new_path = os.path.join(args.input, 'images', image)
+
+        shutil.copy(old_path, new_path)
+
+    print('Images copied!')
+
 def main(args):
     if not os.path.exists(args.input):
         raise FileNotFoundError(f"Input directory '{args.input}' not found")
+
+    images = os.path.join(args.input, 'images')
+    if len(os.listdir(images)) == 0:
+        copy_images(args)
 
     labels_dir = os.path.join(args.input, 'labels')
 
