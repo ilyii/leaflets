@@ -2,10 +2,10 @@ from ultralytics import YOLO
 import argparse
 import os
 from dotenv import load_dotenv
-import shutil
 import re
-from PIL import Image
 import json
+import numpy as np
+from skimage.measure import find_contours
 
 load_dotenv()
 
@@ -22,20 +22,101 @@ def parse_args():
     return parser.parse_args()
 
 def validate_img_path(img_path):
-    # Check if the image is in the correct format
-    # ........mydata/media/upload/dir/image.jpg
     return re.match(r'.*mydata/media/upload/.*\.jpg', img_path)
 
-# def extract_relative_path(img_path):
-#     return img_path.split('mydata/')[1]
+def get_filtered_images(ls_dir):
+    images = [os.path.join(ls_dir, image).replace('\\', '/') for image in os.listdir(ls_dir) if image.endswith('.jpg')]
+    filtered_images = list(filter(validate_img_path, images))
+    if len(filtered_images) != len(images):
+        print('Some images are not in the correct format')
+    return filtered_images
 
-# def validate_img_path(img_path):
-#     # Check if the image is in the correct format
-#     # ........leaflet_project/to_label/dir/image.jpg
-#     return re.match(r'.*leaflet_project/to_label/.*\.jpg', img_path)
+def initialize_annotations(image_path, base_name):
+    return {
+        "data": {
+            "image": os.path.join("/data/upload", base_name, os.path.basename(image_path))
+        },
+        "predictions": [{"model_version": "yolov11", "result": []}],
+    }
 
-# def extract_relative_path(img_path):
-#     return img_path.split('leaflet_project/')[1]
+def extract_bbox(box, names, orig_shape, conf):
+    _class = names[int(box.cls)]
+    x_center, y_center, width, height = box.xywhn[0]
+    pixel_x = (x_center - width / 2) * 100
+    pixel_y = (y_center - height / 2) * 100
+    pixel_width = width * 100
+    pixel_height = height * 100
+
+    return {
+        "original_width": int(orig_shape[1]),
+        "original_height": int(orig_shape[0]),
+        "image_rotation": 0,
+        "value": {
+            "x": float(pixel_x),
+            "y": float(pixel_y),
+            "width": float(pixel_width),
+            "height": float(pixel_height),
+            "rotation": 0,
+            "rectanglelabels": [_class]
+        },
+        "from_name": "class",
+        "to_name": "image",
+        "type": "rectanglelabels",
+        "score": float(conf)
+    }
+
+def extract_polygon(xyn, names, orig_shape, conf, class_index):
+    _class = names[class_index]
+
+    if xyn is None or len(xyn) == 0:
+        return None
+
+    # Convert coordinates to relative values (0-100%)
+    contour = xyn * 100
+
+    return {
+        "original_width": int(orig_shape[1]),
+        "original_height": int(orig_shape[0]),
+        "image_rotation": 0,
+        "value": {
+            "points": contour.tolist(),
+            "polygonlabels": [_class]
+        },
+        "from_name": "label",
+        "to_name": "image",
+        "type": "polygonlabels",
+        "score": float(conf)
+    }
+
+def process_image(yolo, image_path, base_name):
+    results = yolo(image_path)[0]
+    names = results.names
+    boxes = results.boxes
+    masks = results.masks
+    orig_shape = results.orig_shape
+
+    bbox_annotation = initialize_annotations(image_path, base_name)
+    polygon_annotation = initialize_annotations(image_path, base_name)
+
+    for i, box in enumerate(boxes):
+        conf = float(box.conf)
+        if conf < 0.35:
+            continue
+
+        bbox_pred = extract_bbox(box, names, orig_shape, conf)
+        bbox_annotation["predictions"][0]["result"].append(bbox_pred)
+
+        if masks is not None and i < len(masks):
+            xyn = masks.xyn[i]
+            polygon_pred = extract_polygon(xyn, names, orig_shape, conf, int(box.cls))
+            if polygon_pred:
+                polygon_annotation["predictions"][0]["result"].append(polygon_pred)
+
+    return bbox_annotation, polygon_annotation
+
+def save_annotations(annotations, filename):
+    with open(os.path.join(TARGET_DIR, filename), 'w') as f:
+        json.dump(annotations, f)
 
 def main(args):
     if not os.path.exists(args.ls_dir):
@@ -43,76 +124,20 @@ def main(args):
     if not os.path.exists(args.weights):
         raise FileNotFoundError(f"Weights file '{args.weights}' not found")
 
-    to_label = args.ls_dir
-    base_name = os.path.basename(to_label)
-    images = [os.path.join(to_label, image) for image in os.listdir(to_label) if image.endswith('.jpg')]
-    images = [image.replace('\\', '/') for image in images]
-    filtered_images = list(filter(validate_img_path, images))
-    if len(filtered_images) != len(images):
-        print('Some images are not in the correct format')
-        return
-
     yolo = YOLO(args.weights)
+    base_name = os.path.basename(args.ls_dir)
+    filtered_images = get_filtered_images(args.ls_dir)
 
-    pre_annotations = []
+    bbox_annotations = []
+    polygon_annotations = []
 
     for image_path in filtered_images:
-        results = yolo(image_path)[0]
-        names = results.names
-        boxes = results.boxes
-        orig_shape = results.orig_shape
-        classes = [int(x) for x in boxes.cls.cpu()]
-        confs = [float(x) for x in boxes.conf.cpu()]
-        xywhn = boxes.xywhn.cpu().numpy()
-        pre_annotations.append(
-            {
-                "data": {
-                    "image": os.path.join("/data/upload", base_name, os.path.basename(image_path))
-                },
-                "predictions": [{"model_version": "yolov11", "result": []}],
-            }
-        )
+        bbox_annotation, polygon_annotation = process_image(yolo, image_path, base_name)
+        bbox_annotations.append(bbox_annotation)
+        polygon_annotations.append(polygon_annotation)
 
-        for i in range(len(classes)):
-            _class = names[classes[i]]
-            x_center, y_center, width, height = xywhn[i]
-            pixel_x = (x_center - width / 2) * 100
-            pixel_y = (y_center - height / 2) * 100
-            pixel_width = width * 100
-            pixel_height = height * 100
-            orig_shape = (orig_shape[1], orig_shape[0])
-            conf = confs[i]
-
-            if conf < 0.3:
-                continue
-
-            pred = {
-                "original_width": int(orig_shape[0]),
-                "original_height": int(orig_shape[1]),
-                "image_rotation": 0,
-                "value": {
-                    "x": float(pixel_x),
-                    "y": float(pixel_y),
-                    "width": float(pixel_width),
-                    "height": float(pixel_height),
-                    "rotation": 0,
-                    "rectanglelabels": [
-                        _class
-                    ]
-                },
-                "from_name": "class",
-                "to_name": "image",
-                "type": "rectanglelabels",
-                "score": float(conf)
-            }
-
-            pre_annotations[-1]["predictions"][0]["result"].append(pred)
-
-    with open(os.path.join(TARGET_DIR, os.path.basename(to_label) + '.json'), 'w') as f:
-        json.dump(pre_annotations, f)
-
-
-
+    save_annotations(bbox_annotations, f'{base_name}_bboxes.json')
+    save_annotations(polygon_annotations, f'{base_name}_polygons.json')
 
 if __name__ == '__main__':
     args = parse_args()
