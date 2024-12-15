@@ -1,6 +1,7 @@
 ```bash
 uv venv
 .venv/Scripts/activate
+python.exe -m pip install --upgrade pip
 uv sync
 uv run src/scripts/crawling.py
 ```
