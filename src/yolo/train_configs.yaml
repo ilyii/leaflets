@@ -1,15 +1,15 @@
 model_path: "yolo11l-seg.pt"
 data_path: "data/data-seg.yaml"
-epochs: 100
+epochs: 10
 batch: 16
 imgsz: 640
 cache: true
 
-hsv_h: 0.03
-hsv_s: 0.7
-hsv_v: 0.5
-degrees: 15.0
-translate: 0.3
-scale: 0.1
-shear: 15.0
+hsv_h: 0.05
+hsv_s: 0.3
+hsv_v: 0.1
+degrees: 3.0
+translate: 0.1
+scale: 0.05
+shear: 3.0
 fliplr: 0.0

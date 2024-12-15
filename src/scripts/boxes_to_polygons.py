@@ -63,21 +63,23 @@ def main(args):
             # or
             # '0 0 0.5 0.8 0.2 0.3 0.4' (polygon)
             parts = line.split(' ')
+            _class = int(parts[0])
+            coords = list(map(float, parts[1:]))
             if len(parts) == 5:
                 # bbox
-                x_center, y_center, width, height = map(float, parts[1:])
+                x_center, y_center, width, height = coords
                 # 4 points
                 x1, y1 = x_center - width / 2, y_center - height / 2
                 x2, y2 = x_center + width / 2, y_center - height / 2
                 x3, y3 = x_center + width / 2, y_center + height / 2
                 x4, y4 = x_center - width / 2, y_center + height / 2
-                _class = int(parts[0])
                 new_line = f'{_class} {x1} {y1} {x2} {y2} {x3} {y3} {x4} {y4}'
                 # print(new_line)
                 new_lines.append(new_line)
             else:
                 # polygon
-                new_lines.append(line)
+                new_line = f'{_class} {" ".join(map(str, coords))}'
+                new_lines.append(new_line)
 
         new_labels[label_file] = new_lines
 
