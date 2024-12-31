@@ -28,6 +28,7 @@ METADATA_COLUMNS = [
     "crawl_date",
     "valid_from_date",
     "valid_to_date",
+    "url",
 ]
 CRAWL_DATE = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
 CUR_YEAR = pd.Timestamp.now().year
@@ -125,10 +126,17 @@ class leafletDownloader:
         if os.path.exists(METADATA_PATH):
             df = pd.read_csv(METADATA_PATH)
 
-            if "valid_from_date" not in df.columns:
-                df["valid_from_date"] = pd.NaT
-            if "valid_to_date" not in df.columns:
-                df["valid_to_date"] = pd.NaT
+            # if "valid_from_date" not in df.columns:
+            #     df["valid_from_date"] = pd.NaT
+            # if "valid_to_date" not in df.columns:
+            #     df["valid_to_date"] = pd.NaT
+
+            # if "url" not in df.columns:
+            #     df["url"] = ""
+
+            # if "real_name" not in df.columns:
+            #     df["real_name"] = ""
+
 
             df["crawl_date"] = pd.to_datetime(df["crawl_date"])
             df["valid_from_date"] = pd.to_datetime(df["valid_from_date"], format="%Y-%m-%d", errors="coerce")
@@ -142,6 +150,8 @@ class leafletDownloader:
             # convert the supermarket_name and leaflet_id columns to string
             df["supermarket_name"] = df["supermarket_name"].astype(str)
             df["leaflet_id"] = df["leaflet_id"].astype(str)
+            df["url"] = df["url"].astype(str)
+            df["real_name"] = df["real_name"].astype(str)
 
             return df
         else:
@@ -212,12 +222,14 @@ class leafletDownloader:
                 new_metadata.append(
                     {
                         "supermarket_name": str(supermarket_name),
+                        "real_name": str(leaflet["real_name"]),
                         "leaflet_id": str(leaflet_id),
                         "num_pages": int(num_pages),
                         "downloaded_pages": int(downloaded_pages),
                         "crawl_date": CRAWL_DATE,
                         "valid_from_date": valid_from_date,
                         "valid_to_date": valid_to_date,
+                        "url": str(leaflet["leaflet_url"]) if "leaflet_url" in leaflet else "",
                     }
                 )
 
@@ -301,7 +313,7 @@ class leafletDownloader:
                                 "leaflet_url": this_leaflet_url,
                                 "num_pages": num_pages,
                                 "valid_from_date": from_date,
-                                "valid_to_date": to_date,
+                                "valid_to_date": to_date
                             }
                         )
 
@@ -317,11 +329,13 @@ class leafletDownloader:
         :param leaflet_info: Dictionary containing leaflet information
         :return: Dictionary with leaflet info and number of downloaded pages
         """
+        real_name = leaflet_info["supermarket_name"]
         supermarket_name = leaflet_info["hidden_supermarket_name"]
         leaflet_id = leaflet_info["leaflet_id"]
         num_pages = leaflet_info["num_pages"]
         valid_from_date = leaflet_info["valid_from_date"]
         valid_to_date = leaflet_info["valid_to_date"]
+        leaflet_url = leaflet_info["leaflet_url"]
 
         save_dir = os.path.join(TARGET_DIR, supermarket_name, leaflet_id)
         os.makedirs(save_dir, exist_ok=True)
@@ -366,6 +380,8 @@ class leafletDownloader:
             "downloaded_pages": downloaded_pages,
             "valid_from_date": valid_from_date,
             "valid_to_date": valid_to_date,
+            "url": leaflet_url,
+            "real_name": real_name,
         }
 
     # def is_leaflet_complete(self, save_dir, num_pages):
