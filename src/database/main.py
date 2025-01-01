@@ -6,7 +6,6 @@ from datetime import datetime
 
 from utils import setup_logging, load_config
 from create import DatabaseCreator
-from update import DatabaseUpdater
 from delete import DatabaseDeleter
 from queries import DatabaseQueries
 from extract_deals import DealExtractor
@@ -23,10 +22,6 @@ def main():
         if action == 'create_database':
             creator = DatabaseCreator(config)
             creator.create_database()
-
-        elif action == 'update_leaflets':
-            updater = DatabaseUpdater(config)
-            updater.update_leaflets()
 
         elif action == 'extract_deals':
             extractor = DealExtractor(config)

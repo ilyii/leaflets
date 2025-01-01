@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
-from schema import Base, Supermarket, Leaflet
+from schema import Base, Supermarket, Leaflet, Deal
 from utils import load_csv_path, load_db_path
 
 DEFAULT_DATE = datetime(1900, 1, 1)
@@ -77,6 +77,7 @@ class DatabaseCreator:
                     new_leaflet = Leaflet(
                         leaflet_id=row["leaflet_id"],
                         supermarket_id=supermarket_map[row["real_name"]],
+                        supermarket_leaflet_name=row["supermarket_name"],
                         num_pages=row["num_pages"],
                         downloaded_pages=row["downloaded_pages"],
                         crawl_date=crawl_date,
@@ -100,3 +101,34 @@ class DatabaseCreator:
             raise
         finally:
             session.close()
+
+    def create_deal_polygon(self, deal_data):
+        """Create a new deal with polygon data and return the deal ID."""
+
+        session = self.Session()
+
+        try:
+            new_deal = Deal(
+                leaflet_id=deal_data["leaflet_id"],
+                page_num=deal_data["page_num"],
+                deal_category=deal_data["deal_category"],
+                orig_img_size=deal_data["orig_img_size"],
+                deal_img_size=deal_data["deal_img_size"],
+                polygon_points_abs=deal_data["polygon_points_abs"],
+                polygon_points_rel=deal_data["polygon_points_rel"],
+                bbox_points_abs=deal_data["bbox_points_abs"],
+                bbox_points_rel=deal_data["bbox_points_rel"],
+                polygon_conf=deal_data["polygon_conf"]
+            )
+            session.add(new_deal)
+            session.commit()
+
+            deal_id = new_deal.id
+        except Exception as e:
+            session.rollback()
+            logging.error(f"Error creating new deal: {str(e)}")
+            raise
+        finally:
+            session.close()
+
+        return deal_id

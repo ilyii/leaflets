@@ -1,6 +1,6 @@
 # database/configs.yaml
 # Main action to execute
-action: "create_database"
+action: "extract_deals"
 # $$PROJECT_DIR$$ should be set in .env file with path to project directory
 metadata_path: "$$PROJECT_DIR$$/crawled_leaflets/metadata.csv"
 
@@ -26,27 +26,16 @@ create_database:
   force_recreate: true
   init_metadata_values: true
 
-#########################
-#### update_leaflets ####
-#########################
-update_leaflets:
-  supermarket_ids: [1, 2, 3]
-  update_existing: true
-  max_retries: 3
-  timeout: 30
-  download_path: "data/leaflets/"
-
 #######################
 #### extract_deals ####
 #######################
 extract_deals:
-  model_path: "models/deal_detector.pt"
+  force_reprocess: true
   confidence_threshold: 0.5
+  iou: 0.4
   device: "cuda"
-  batch_size: 4
-  input_size: [640, 640]
-  input_folder: "data/leaflets/"
-  output_folder: "data/extracted/"
+  batch_size: 64
+  half: true
 
 ######################
 #### delete_deals ####

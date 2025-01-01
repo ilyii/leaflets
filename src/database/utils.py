@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+
 def load_project_dir():
     """Load project directory from environment variable."""
     project_dir = os.getenv("PROJECT_DIR")
@@ -19,13 +20,31 @@ def load_project_dir():
         raise ValueError("PROJECT_DIR environment variable not set")
     return project_dir
 
+
 def load_db_path():
     """Load database path from environment variable."""
     return f"sqlite:///{load_project_dir()}/crawled_leaflets/supermarket_leaflets.db"
 
+
 def load_csv_path():
     """Load CSV path from environment variable."""
     return f"{load_project_dir()}/crawled_leaflets/metadata.csv"
+
+
+def load_deal_img_dir():
+    """Load deal image directory from environment variable."""
+    return f"{load_project_dir()}/deals"
+
+
+def load_leaflet_dir():
+    """Load leaflet image directory from environment variable."""
+    return f"{load_project_dir()}/crawled_leaflets"
+
+
+def load_model_path():
+    """Load model path from environment variable."""
+    return f"{load_project_dir()}/models/model.pt"
+
 
 def load_config(config_path="configs.yaml"):
     """Load configuration from YAML file."""
