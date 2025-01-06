@@ -1,0 +1,57 @@
+# database/configs.yaml
+# Main action to execute
+action: "extract_deals"
+# $$PROJECT_DIR$$ should be set in .env file with path to project directory
+metadata_path: "$$PROJECT_DIR$$/crawled_leaflets/metadata.csv"
+
+##########################
+#### General Settings ####
+##########################
+database:
+  # Just set PROJECT_DIR in .env file
+  # path: "sqlite:///deals.db"
+  echo_queries: false
+  backup_enabled: false
+  backup_path: "backups/"
+
+logging:
+  level: "INFO"
+  file: "logs/app.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+#########################
+#### create_database ####
+#########################
+create_database:
+  force_recreate: true
+  init_metadata_values: true
+
+#######################
+#### extract_deals ####
+#######################
+extract_deals:
+  force_reprocess: true
+  confidence_threshold: 0.5
+  iou: 0.4
+  device: "cuda"
+  batch_size: 64
+  half: true
+
+######################
+#### delete_deals ####
+######################
+delete_deals:
+  older_than_days: 30
+  specific_supermarkets: [] # Empty for all
+  backup_before_delete: true
+
+#####################
+#### run_queries ####
+#####################
+run_queries:
+  query_type: "active_deals" # active_deals, price_comparison, category_summary
+  export_format: "csv"
+  export_path: "reports/"
+  date_range:
+    start: null # null for all
+    end: null # null for all

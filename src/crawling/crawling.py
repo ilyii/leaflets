@@ -12,6 +12,7 @@ import io
 import yaml
 import pandas as pd
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -19,8 +20,34 @@ CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.normpath(os.getenv("PROJECT_DIR"))
 TARGET_DIR = os.path.join(PROJECT_DIR, "crawled_leaflets")
 METADATA_PATH = os.path.join(TARGET_DIR, "metadata.csv")
-METADATA_COLUMNS = ["supermarket_name", "leaflet_id", "num_pages", "downloaded_pages", "crawl_date"]
-CRAWL_DATE = pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')
+METADATA_COLUMNS = [
+    "supermarket_name",
+    "leaflet_id",
+    "num_pages",
+    "downloaded_pages",
+    "crawl_date",
+    "valid_from_date",
+    "valid_to_date",
+    "url",
+]
+CRAWL_DATE = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+CUR_YEAR = pd.Timestamp.now().year
+CUR_MONTH = pd.Timestamp.now().month
+
+MONTH_TO_INT = {
+    "Jan": 1,
+    "Feb": 2,
+    "Mär": 3,
+    "Apr": 4,
+    "Mai": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Okt": 10,
+    "Nov": 11,
+    "Dez": 12,
+}
 
 # Remove the default console logger
 logging.remove()
@@ -99,16 +126,32 @@ class leafletDownloader:
         if os.path.exists(METADATA_PATH):
             df = pd.read_csv(METADATA_PATH)
 
-            # convert the crawl_date column to datetime
-            df['crawl_date'] = pd.to_datetime(df['crawl_date'])
+            # if "valid_from_date" not in df.columns:
+            #     df["valid_from_date"] = pd.NaT
+            # if "valid_to_date" not in df.columns:
+            #     df["valid_to_date"] = pd.NaT
+
+            # if "url" not in df.columns:
+            #     df["url"] = ""
+
+            # if "real_name" not in df.columns:
+            #     df["real_name"] = ""
+
+
+            df["crawl_date"] = pd.to_datetime(df["crawl_date"])
+            df["valid_from_date"] = pd.to_datetime(df["valid_from_date"], format="%Y-%m-%d", errors="coerce")
+            df["valid_to_date"] = pd.to_datetime(df["valid_to_date"], format="%Y-%m-%d", errors="coerce")
+
 
             # convert the num_pages and downloaded_pages columns to int
-            df['num_pages'] = df['num_pages'].astype(int)
-            df['downloaded_pages'] = df['downloaded_pages'].astype(int)
+            df["num_pages"] = df["num_pages"].astype(int)
+            df["downloaded_pages"] = df["downloaded_pages"].astype(int)
 
             # convert the supermarket_name and leaflet_id columns to string
-            df['supermarket_name'] = df['supermarket_name'].astype(str)
-            df['leaflet_id'] = df['leaflet_id'].astype(str)
+            df["supermarket_name"] = df["supermarket_name"].astype(str)
+            df["leaflet_id"] = df["leaflet_id"].astype(str)
+            df["url"] = df["url"].astype(str)
+            df["real_name"] = df["real_name"].astype(str)
 
             return df
         else:
@@ -126,28 +169,69 @@ class leafletDownloader:
             name = name.replace(mask, "<MASK>")
         return name
 
+    @staticmethod
+    def extract_valid_date(div):
+        date_str = div.find("small", {"class": "d-block text-muted mb-1"}).text
+        date_str = date_str.strip().replace("  ", " ")
+
+        # Extract day and month values (example: "Gültig von 28 Dez. bis 31 Dez.")
+        parts = date_str.replace(".", "").split()
+        from_day = int(parts[2])
+        from_month = MONTH_TO_INT[parts[3]]
+        to_day = int(parts[5])
+        to_month = MONTH_TO_INT[parts[6]]
+
+        # Handle year transition
+        from_year = to_year = CUR_YEAR
+
+        if from_month == 12 and to_month == 1:
+            if CUR_MONTH == 12:
+                to_year = to_year + 1
+            else:
+                from_year = from_year - 1
+
+        if from_month == 1 and to_month == 1:
+            # code is running in december, but the leaflet is valid in january next year
+            if CUR_MONTH == 12:
+                from_year = from_year + 1
+                to_year = to_year + 1
+
+        # Create timestamps
+        from_date = pd.Timestamp(f"{from_year}-{from_month:02d}-{from_day:02d}").strftime("%Y-%m-%d")
+        to_date = pd.Timestamp(f"{to_year}-{to_month:02d}-{to_day:02d}").strftime("%Y-%m-%d")
+
+        return from_date, to_date
+
     def update_metadata(self, downloaded_leaflets):
         new_metadata = []
         for leaflet in downloaded_leaflets:
-            supermarket_name = str(leaflet['hidden_supermarket_name'])
-            leaflet_id = str(leaflet['leaflet_id'])
-            num_pages = int(leaflet['num_pages'])
-            downloaded_pages = int(leaflet['downloaded_pages'])
+            supermarket_name = str(leaflet["hidden_supermarket_name"])
+            leaflet_id = str(leaflet["leaflet_id"])
+            num_pages = int(leaflet["num_pages"])
+            downloaded_pages = int(leaflet["downloaded_pages"])
+            valid_from_date = leaflet["valid_from_date"]
+            valid_to_date = leaflet["valid_to_date"]
 
             # Check if the leaflet is already in the metadata
             existing_leaflet = self.metadata_df[
-                (self.metadata_df['supermarket_name'] == supermarket_name) &
-                (self.metadata_df['leaflet_id'] == leaflet_id)
+                (self.metadata_df["supermarket_name"] == supermarket_name)
+                & (self.metadata_df["leaflet_id"] == leaflet_id)
             ]
 
             if len(existing_leaflet) <= 0:
-                new_metadata.append({
-                    'supermarket_name': str(supermarket_name),
-                    'leaflet_id': str(leaflet_id),
-                    'num_pages': int(num_pages),
-                    'downloaded_pages': int(downloaded_pages),
-                    'crawl_date': CRAWL_DATE
-                })
+                new_metadata.append(
+                    {
+                        "supermarket_name": str(supermarket_name),
+                        "real_name": str(leaflet["real_name"]),
+                        "leaflet_id": str(leaflet_id),
+                        "num_pages": int(num_pages),
+                        "downloaded_pages": int(downloaded_pages),
+                        "crawl_date": CRAWL_DATE,
+                        "valid_from_date": valid_from_date,
+                        "valid_to_date": valid_to_date,
+                        "url": str(leaflet["leaflet_url"]) if "leaflet_url" in leaflet else "",
+                    }
+                )
 
         # Add new metadata to the DataFrame
         if new_metadata:
@@ -218,14 +302,20 @@ class leafletDownloader:
                         leaflet_pages = eval(leaflet_pages)
                         num_pages = len(leaflet_pages)
 
-                        leaflets.append({
-                            "supermarket_name": supermarket_name,
-                            "hidden_supermarket_name": hidden_supermarket_name,
-                            "leaflet_id": leaflet_id,
-                            "leaflet_href": leaflet_href,
-                            "leaflet_url": this_leaflet_url,
-                            "num_pages": num_pages,
-                        })
+                        from_date, to_date = self.extract_valid_date(div)
+
+                        leaflets.append(
+                            {
+                                "supermarket_name": supermarket_name,
+                                "hidden_supermarket_name": hidden_supermarket_name,
+                                "leaflet_id": leaflet_id,
+                                "leaflet_href": leaflet_href,
+                                "leaflet_url": this_leaflet_url,
+                                "num_pages": num_pages,
+                                "valid_from_date": from_date,
+                                "valid_to_date": to_date
+                            }
+                        )
 
         except Exception as e:
             logging.error(f"Error processing market {market}: {str(e)}")
@@ -239,9 +329,13 @@ class leafletDownloader:
         :param leaflet_info: Dictionary containing leaflet information
         :return: Dictionary with leaflet info and number of downloaded pages
         """
+        real_name = leaflet_info["supermarket_name"]
         supermarket_name = leaflet_info["hidden_supermarket_name"]
         leaflet_id = leaflet_info["leaflet_id"]
         num_pages = leaflet_info["num_pages"]
+        valid_from_date = leaflet_info["valid_from_date"]
+        valid_to_date = leaflet_info["valid_to_date"]
+        leaflet_url = leaflet_info["leaflet_url"]
 
         save_dir = os.path.join(TARGET_DIR, supermarket_name, leaflet_id)
         os.makedirs(save_dir, exist_ok=True)
@@ -281,20 +375,27 @@ class leafletDownloader:
             else:
                 logging.info(f"Image {save_path} already exists. Skipping.")
 
-        return {**leaflet_info, "downloaded_pages": downloaded_pages}
+        return {
+            **leaflet_info,
+            "downloaded_pages": downloaded_pages,
+            "valid_from_date": valid_from_date,
+            "valid_to_date": valid_to_date,
+            "url": leaflet_url,
+            "real_name": real_name,
+        }
 
-    def is_leaflet_complete(self, save_dir, num_pages):
-        """
-        Check if all pages of a leaflet have been downloaded.
+    # def is_leaflet_complete(self, save_dir, num_pages):
+    #     """
+    #     Check if all pages of a leaflet have been downloaded.
 
-        :param save_dir: Directory where leaflet images are saved
-        :param num_pages: Total number of pages in the leaflet
-        :return: True if all pages are downloaded, False otherwise
-        """
-        for page in range(1, num_pages + 1):
-            if not os.path.exists(os.path.join(save_dir, f"{page}.jpg")):
-                return False
-        return True
+    #     :param save_dir: Directory where leaflet images are saved
+    #     :param num_pages: Total number of pages in the leaflet
+    #     :return: True if all pages are downloaded, False otherwise
+    #     """
+    #     for page in range(1, num_pages + 1):
+    #         if not os.path.exists(os.path.join(save_dir, f"{page}.jpg")):
+    #             return False
+    #     return True
 
     def run(self):
         """
@@ -304,7 +405,9 @@ class leafletDownloader:
 
         # Process markets concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.config["workers"]["process"]) as executor:
-            all_leaflets = list(tqdm(executor.map(self.process_market, markets), total=len(markets), desc="Processing markets"))
+            all_leaflets = list(
+                tqdm(executor.map(self.process_market, markets), total=len(markets), desc="Processing markets")
+            )
 
         # Flatten the list of leaflets
         leaflets_to_download = [leaflet for market_leaflets in all_leaflets for leaflet in market_leaflets]

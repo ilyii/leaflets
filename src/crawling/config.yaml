@@ -10,6 +10,7 @@ unique_names:
 to_mask:
   - hitbbq
   - lidlconnect
+  - bestellmagazin
 
 workers:
   process: 10
