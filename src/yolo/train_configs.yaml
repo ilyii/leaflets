@@ -1,8 +1,8 @@
-model_path: "yolo11l-seg.pt"
+model_path: "yolo11m.pt"
 data_path: "data/data-seg.yaml"
 epochs: 10
 batch: 16
-imgsz: 640
+imgsz: 480
 cache: true
 
 hsv_h: 0.05
