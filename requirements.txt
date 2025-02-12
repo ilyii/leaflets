@@ -1,0 +1,8 @@
+--find-links https://download.pytorch.org/whl/torch_stable.html
+
+ultralytics
+torch
+opencv-python
+matplotlib
+python-doctr
+easyocr

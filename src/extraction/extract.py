@@ -1,12 +1,73 @@
 from collections import defaultdict
 import os
 import argparse
+import pickle
 
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+from doctr.io import DocumentFile
+from doctr.models import ocr_predictor
+from openai import OpenAI
 
 import utils
+
+llm = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="lm-studio")
+LLM_MODEL = "qwen2.5-7b-instruct-1m@q8_0"
+
+messages = [
+        {
+            "role": "system",
+            "content": (
+                """
+                    **Context:**  
+                    You are an advanced language model specializing in structured data extraction from OCR text. Your task is to extract structured information from a supermarket deal OCR result.  
+                    **Important: Extract exactly one deal. Output a single JSON object with the required four fields.**  
+
+                    **Extraction Fields:**  
+                    - **Price**: The product price in euros (€), ensuring proper decimal placement.  
+                    - **Brand**: The brand name, if explicitly mentioned.  
+                    - **Product Description**: The product name, key details, packaging, size, or specifications.  
+                    - **Discount**: A number representing the percentage or absolute discount, if applicable.  
+
+                    **Guidelines:**  
+                    - **Return data strictly in JSON format as a single object.**  
+                    - **Ensure accuracy** by considering spatial context if available.  
+                    - **Use null values** for missing fields.  
+                    - **Filter out irrelevant numbers** (e.g., product weight should not be confused with price).  
+                    - **Fix OCR errors**:  
+                    1. **Price correction**: Identify and fix missing decimals (e.g., `"229"` → `"2.29"`).  
+                    2. **Contextual reasoning**: Infer correct prices using the euro symbol and typical pricing patterns.  
+                    3. **Ignore OCR noise**: Disregard unrelated text like `"Faarconn Galh"` or `"4B6e3Alus"`.  
+
+                    **Output:**  
+                    - **Return JSON only, containing exactly one deal.**  
+                    - **Ensure all prices are in euros (€) only.**  
+                    - **No additional text, explanations, or list format—only a single JSON object.**  
+
+                    **Example Input (OCR Text):**  
+                    [VITALIS, Magnesium 250 mg, 42, oder Calcium 400 mg, Vitalis, Vitamin D3'2+, lum 400 me, Nahrungserganzungsmittel mit, Ds2s0, Magnesium bzw: mit Calcium, Vitalis, und Vitamin D3, je 150 Tabletten, je 112-bzw., Magnesium, 250 mg, ke-Preis 26.70 bzw 18.12, Mg, Faarconn Galh, 229, 130, 4B6e3Alus, 165-8, Packung, Pnacon]  
+
+                    **Expected Output:**  
+                    ```json
+                    {
+                        "Price": "2.99€",
+                        "Brand": "Vitalis",
+                        "Product Description": "Magnesium 250 mg, Calcium 400 mg, Vitamin D3, 150 Tabletten",
+                        "Discount": null
+                    }
+                    ```
+
+                """
+            )
+        }
+    ]
+
+
+
+
+
+
 
 cdir = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,13 +81,10 @@ def get_files(src):
 
     if len(images) != len(labels):
         print("WARNING: Number of images and labels do not match. Removing extra files.")
-        raise NotImplementedError("Alginment of images and labels not implemented yet.")
-        # images = [f for f in images if os.path.exists(".".join(f.replace("images", "labels").split(".")[:-1] + ["txt"])) in labels]
-        # labels = [f for f in labels if ".".join(f.replace("labels", "images").split(".")[:-1] + ["jpg"]) in images]
+        raise NotImplementedError("Alignment of images and labels not implemented yet.")
     return images, labels
 
-
-def extract(imagepaths, labelpaths):
+def extract_deals(imagepaths, labelpaths):
     """Preprocess images and labels"""
     res = defaultdict(list)
     for imgp, lblp in zip(imagepaths, labelpaths):
@@ -34,95 +92,40 @@ def extract(imagepaths, labelpaths):
         image = cv2.cvtColor(cv2.imread(imgp), cv2.COLOR_BGR2RGB)
         deals = utils.extract_polygons(image, polygons)
         res[imgp].extend(deals)
-
     return res
 
-    
-def preprocess_image(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+def ocr_easyocr(image):
+    """Perform OCR on an image using EasyOCR"""
+    import easyocr
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(image)
+    return result
 
-    # Use Otsu's thresholding for better segmentation
-    _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+def ocr_tesseract(image):
+    """Perform OCR on an image using Tesseract"""
+    import pytesseract
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    custom_oem_psm_config = r'--oem 3 --psm 6'
+    result = pytesseract.image_to_string(image, config=custom_oem_psm_config, lang="deu")
+    return result
 
-    # Apply morphological closing to fill small gaps
-    kernel = np.ones((5,5), np.uint8)
-    closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-
-    # Find contours with improved thresholding
-    contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    largest_contour = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(largest_contour)
-    product_img = image[y:y+h, x:x+w]
-
-    # Create a mask and draw all detected contours
-    mask = np.zeros_like(gray)
-    cv2.drawContours(mask, contours, -1, (255), thickness=cv2.FILLED)
-
-    # Apply the refined mask to the image
-    masked_image = cv2.bitwise_and(image, image, mask=mask)
-
-    return gray, product_img, masked_image
+def ocr_doctr(image):
+    """Perform OCR on an image using DocTR"""
+    model = ocr_predictor(det_arch='db_resnet50', reco_arch='crnn_vgg16_bn', pretrained=True)
+    doc = DocumentFile.from_images(image)
+    result = model(doc)
+    return result.render()
 
 
-def canny_findcontours(image):
-    proc = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    canny = cv2.Canny(proc, 12, 180)
-    kernel = np.ones((3, 3))
-    proc = cv2.dilate(canny, kernel, iterations=6)
-    final = cv2.erode(proc, kernel, iterations=6)
-
-    contours,se = cv2.findContours(final, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print(se)
-    
-    fig, ax = plt.subplots(len(contours)+2,1)
-    ax[0].imshow(proc)
-    # ax[1].imshow(final)
-    for i, contour in enumerate(contours):
-        x,y,w,h = cv2.boundingRect(contour)
-        ax[i+2].imshow(image[y:y+h, x:x+w])
-    plt.show()
-    # return contours
-
-
-def grabcut_findcontours(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  
-
-    # Find background color
-    bg_color = np.argmax(np.bincount(gray.flatten()))
-    mask = cv2.inRange(gray, int(bg_color-10), int(bg_color+10))
-    print(np.unique(mask))
-    mask[mask == 255] = cv2.GC_PR_BGD
-    mask[mask == 0] = cv2.GC_PR_FGD
-
-    plt.imshow(mask)
-    plt.show()
-
-    bgdModel = np.zeros((1,65),np.float64)
-    fgdModel = np.zeros((1,65),np.float64)
-
-    mask, bgdModel, fgdModel = cv2.grabCut(image, mask, None, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_MASK)
-
-    mask = np.where((mask==2)|(mask==0),0,1).astype('uint8')
-    foreground = image*mask[:,:,np.newaxis]
-
-    plt.imshow(foreground)
-    plt.show()
-    exit()
-
-
-
-    contours,_ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    fig, ax = plt.subplots(len(contours)+1,1)
-    ax[0].imshow(foreground)
-    # ax[1].imshow(final)
-    for i, contour in enumerate(contours):
-        x,y,w,h = cv2.boundingRect(contour)
-        ax[i+1].imshow(image[y:y+h, x:x+w])
-    plt.show()
+def extract_json(string):
+    """Extract JSON from a string"""
+    import re
+    pattern = r"\{.*\}"
+    match = re.search(pattern, string)
+    if match:
+        return match.group()
+    return None
 
 
 def get_args():
@@ -131,16 +134,30 @@ def get_args():
     args = parser.parse_args()
     return args
 
-
 def main():
-    """Main"""
+    global messages
     args = get_args()
     imgps, lblps = get_files(args.src)
-    dealdict = extract(imgps, lblps)
-    for imgp, deals in dealdict.items():
-        for deal in deals:
-            grabcut_findcontours(deal)
+    dealdict = extract_deals(imgps, lblps)
+    resdict = defaultdict(list)
+    try:
+        for imgp, deals in dealdict.items():
+            for deal in deals:
 
+                ocr_res = ocr_easyocr(deal)
+                
+                messages.append({"role": "user", "content": f"OCR Input: {ocr_res}\nJSON OUTPUT:"})
+                llm_response = llm.chat.completions.create(
+                    model=LLM_MODEL, messages=messages)
+                del messages[-1]
+                res_json = extract_json(llm_response.choices[0].message.content)
+                resdict[imgp].append(res_json)
+    except Exception as e:
+        print("ERROR:", e)
+    finally:
+        pickle.dump(resdict, open("resdict.pkl", "wb"))
+
+            
 
 if __name__ == "__main__":
     main()
