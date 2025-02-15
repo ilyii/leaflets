@@ -11,6 +11,7 @@ dependencies = [
     "matplotlib>=3.10.0",
     "nltk>=3.9.1",
     "numpy>=2.1.1",
+    "ollama>=0.4.7",
     "opencv-python>=4.11.0.86",
     "pandas>=2.2.3",
     "python-doctr>=0.11.0",
