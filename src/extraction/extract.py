@@ -1,4 +1,7 @@
 from collections import defaultdict
+import json
+import re
+import time
 import os
 import argparse
 import pickle
@@ -15,8 +18,7 @@ import utils
 llm = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="lm-studio")
 LLM_MODEL = "qwen2.5-7b-instruct-1m@q8_0"
 
-messages = [
-        {
+SYSTEM_TEMPLATE = {
             "role": "system",
             "content": (
                 """
@@ -61,7 +63,6 @@ messages = [
                 """
             )
         }
-    ]
 
 
 
@@ -120,17 +121,20 @@ def ocr_doctr(image):
 
 def extract_json(string):
     """Extract JSON from a string"""
-    import re
-    pattern = r"\{.*\}"
-    match = re.search(pattern, string)
+    pattern = r"\{(?:[^{}]|(?:\{[^{}]*\}))*\}"
+    match = re.search(pattern, string, re.DOTALL)
     if match:
-        return match.group()
+        try:
+            return json.loads(match.group())  # Convert to dictionary
+        except json.JSONDecodeError:
+            return match.group()  # Return raw string if invalid JSON
     return None
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="YOLO Prediction Script")
     parser.add_argument("--src", "-i", type=str, required=True, help="Path to the source directory with subdirs: images, labels")
+    parser.add_argument("--resume", action="store_true", help="Resume from last checkpoint")
     args = parser.parse_args()
     return args
 
@@ -139,25 +143,33 @@ def main():
     args = get_args()
     imgps, lblps = get_files(args.src)
     dealdict = extract_deals(imgps, lblps)
-    resdict = defaultdict(list)
-    try:
-        for imgp, deals in dealdict.items():
-            for deal in deals:
+    if args.resume:
+        print("Resuming...")
+        resdict = pickle.load(open("resdict.pkl", "rb"))
+        resdict.popitem()
+    else:
+        print("Starting from scratch...")
+        resdict = defaultdict(list)
+    
+    for imgp, deals in dealdict.items():
+        if args.resume and imgp in resdict:
+            continue
 
+        for d_idx, deal in enumerate(deals):
+            try:
                 ocr_res = ocr_easyocr(deal)
                 
-                messages.append({"role": "user", "content": f"OCR Input: {ocr_res}\nJSON OUTPUT:"})
+                messages = ([SYSTEM_TEMPLATE,{"role": "user", "content": f"OCR Input: {ocr_res}\nJSON OUTPUT:"}])
                 llm_response = llm.chat.completions.create(
                     model=LLM_MODEL, messages=messages)
-                del messages[-1]
                 res_json = extract_json(llm_response.choices[0].message.content)
                 resdict[imgp].append(res_json)
-    except Exception as e:
-        print("ERROR:", e)
-    finally:
-        pickle.dump(resdict, open("resdict.pkl", "wb"))
+            except Exception as e:
+                print(f"ERROR: {e} for {imgp} [{d_idx}]")
+                continue
+
+    pickle.dump(resdict, open("resdict.pkl", "wb"))
 
             
-
 if __name__ == "__main__":
     main()
