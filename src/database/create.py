@@ -20,15 +20,14 @@ class DatabaseCreator:
         if self.c_config["force_recreate"]:
             Base.metadata.drop_all(self.engine)
             logging.info("Dropped existing tables")
-
-        Base.metadata.create_all(self.engine)
-        logging.info("Created database tables")
+            Base.metadata.create_all(self.engine)
+            logging.info("Created database tables")
 
         if self.c_config["init_metadata_values"]:
             self._init_with_metadata()
 
-    def _init_with_metadata(self):
 
+    def _init_with_metadata(self):
         try:
             metadata_df = pd.read_csv(load_csv_path())
         except Exception as e:
