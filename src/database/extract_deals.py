@@ -196,6 +196,7 @@ class DealExtractor:
             half=self.half,
             device=self.device,
             batch=self.batch_size,
+            verbose=False,
         )
 
         results = []
@@ -231,8 +232,11 @@ class DealExtractor:
             self.db_creator.create_database()
             # self.db_queries.execute_query("DELETE FROM deals")
             shutil.rmtree(output_folder, ignore_errors=True)
+        elif self.extract_config["update_db"]:
+            self.db_creator._init_with_metadata()
 
-        output_folder.mkdir(exist_ok=True)
+        if not output_folder.exists():
+            output_folder.mkdir(parents=True)
 
         session = self.db_creator.Session()
 
@@ -247,17 +251,18 @@ class DealExtractor:
         leaflet_images = []
         try:
             for leaflet in tqdm(leaflets, desc="Processing leaflets", unit="leaflet", leave=False):
-                if leaflet.processed and not self.extract_config["force_reprocess"]:
-                    continue
-
                 supermarket_leaflet_name = leaflet.supermarket_leaflet_name
                 leaflet_id = leaflet.leaflet_id
                 downloaded_pages = leaflet.downloaded_pages
-                if downloaded_pages == 0:
+
+                if (leaflet.processed and not self.extract_config["force_reprocess"]) or downloaded_pages == 0:
+                    if downloaded_pages == 0:
+                        # update as processed in db
+                        leaflet_update_query = "UPDATE leaflet SET processed = 1 WHERE leaflet_id = :leaflet_id"
+                        self.db_queries.update_query(leaflet_update_query, {"leaflet_id": leaflet.leaflet_id})
                     continue
 
                 leaflet_path = input_folder / supermarket_leaflet_name / str(leaflet_id)
-
                 paths = self.get_leaflet_image_paths(leaflet_path, supermarket_leaflet_name, leaflet_id)
                 if len(paths) != downloaded_pages:
                     logging.error(f"Error loading leaflet images: {supermarket_leaflet_name}, {leaflet_id}")
@@ -266,7 +271,6 @@ class DealExtractor:
                     continue
 
                 leaflet_images.append(paths)
-                # break
 
         except Exception as e:
             logging.error(f"Error processing leaflets: {str(e)}")
@@ -302,8 +306,7 @@ class DealExtractor:
 
                 # update leaflet as processed
                 leaflet_update_query = "UPDATE leaflet SET processed = 1 WHERE leaflet_id = :leaflet_id"
-                leaflet_values = {"leaflet_id": result["leaflet_id"]}
-                self.db_queries.update_query(leaflet_update_query, leaflet_values)
+                self.db_queries.update_query(leaflet_update_query, {"leaflet_id": result["leaflet_id"]})
             except Exception as e:
                 logging.error(f"Error processing leaflet image: {result['full_path']}, Error: {str(e)}")
                 continue

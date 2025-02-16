@@ -23,16 +23,17 @@ logging:
 #### create_database ####
 #########################
 create_database:
-  force_recreate: true
+  force_recreate: false
   init_metadata_values: true
 
 #######################
 #### extract_deals ####
 #######################
 extract_deals:
-  force_reprocess: true
+  force_reprocess: false
+  update_db: false
   confidence_threshold: 0.5
-  iou: 0.4
+  iou: 0.7
   device: "cuda"
   batch_size: 64
   half: true
