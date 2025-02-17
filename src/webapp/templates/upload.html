@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Prospekt hochladen</h2>
+
+<form id="uploadForm">
+    <input type="file" id="pdfFile" name="file" accept="application/pdf" required>
+    <button type="submit">Hochladen</button>
+</form>
+
+<div id="result"></div>
+
+<!-- Loader -->
+<div id="loader" class="loader-overlay" style="display: none;">
+    <div class="loader-spinner"></div>
+    <p>Bitte warten, PDF wird verarbeitet ...</p>
+</div>
+
+<script>
+    const form = document.getElementById("uploadForm");
+    const loader = document.getElementById("loader");
+    const resultDiv = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById("pdfFile");
+        if (!fileInput.files.length) return;
+
+        // 1. Ladeanzeige einblenden
+        loader.style.display = "block";
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+            const res = await fetch("/api/upload_pdf", {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+
+            // 2. Ladeanzeige ausblenden
+            loader.style.display = "none";
+
+            if (data.session_id) {
+                // Weiterleitung zur Preview-Seite
+                window.location.href = `/preview?session_id=${data.session_id}`;
+            } else {
+                resultDiv.textContent = "Fehler: Keine Session ID erhalten.";
+            }
+        } catch (err) {
+            console.error(err);
+            loader.style.display = "none";
+            resultDiv.textContent = "Upload fehlgeschlagen.";
+        }
+    });
+</script>
+{% endblock %}

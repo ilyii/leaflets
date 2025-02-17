@@ -1,0 +1,29 @@
+<!-- templates/preview.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Prospekt-Vorschau</h2>
+
+<button id="prevBtn">&#8678; Zurück</button>
+<span id="pageIndicator">Seite ? von ?</span>
+<button id="nextBtn">Weiter &#8680;</button>
+
+<div class="preview-container">
+    <img id="pageImage" />
+    <canvas id="overlayCanvas"></canvas>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2 id="modalTitle">Details</h2>
+        <p id="modalText"></p>
+    </div>
+</div>
+
+<script>
+    let sessionId = "{{ session_id }}";
+</script>
+<script src="/static/js/preview.js"></script>
+{% endblock %}

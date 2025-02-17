@@ -1,0 +1,202 @@
+/* style.css */
+
+/* Grundlayout reset */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+header {
+    background-color: #2c3e50;
+    /* dunkelgrau/blau */
+    color: #ffffff;
+    padding: 1rem;
+}
+
+header h1 {
+    margin: 0;
+}
+
+/* Container layout: Sidebar + Content nebeneinander */
+.container {
+    display: flex;
+    min-height: 100vh;
+    /* Vollhöhe */
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    background-color: #34495e;
+    color: #ffffff;
+    padding: 0;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 0;
+}
+
+.sidebar a {
+    display: block;
+    padding: 1rem;
+    color: #ffffff;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.sidebar a:hover {
+    background-color: #3b5369;
+    /* etwas helleres Blau beim Hover */
+}
+
+/* Hauptbereich */
+.main-content {
+    flex: 1;
+    padding: 1rem;
+}
+
+/* Der Grid-Container */
+.grid-container {
+    display: grid;
+    grid-gap: 1rem;
+    /* Abstand zwischen den Zellen */
+    /* Automatisch soviele Spalten, wie Platz ist (mindestens 200px pro Card) */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    justify-items: center;
+    /* Karten werden in ihrer Spalte horizontal zentriert */
+    padding: 1rem;
+}
+
+.deal-card {
+    width: 200px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    text-align: center;
+    /* Hier KEINE feste Höhe. */
+    display: flex;
+    flex-direction: column;
+}
+
+.deal-card .image-container {
+    width: 100%;
+    aspect-ratio: 1/1;
+    /* 1:1; modernes CSS-Feature, sorgt für Quadrate */
+    position: relative;
+    overflow: hidden;
+}
+
+.deal-card .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.deal-card .info {
+    padding: 0.5rem;
+}
+
+
+/* Preview Container: Bild + Canvas übereinander */
+.preview-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Bild */
+.preview-container img {
+    display: block;
+    max-width: 600px;
+    height: auto;
+}
+
+/* Canvas passend positionieren */
+.preview-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    /* Maus-Events können wir umleiten,
+                            aber hier wollen wir es ggf. aktiv haben -> s.u. */
+}
+
+/* Modal (einfache Variante) */
+.modal {
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 400px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Overlay-Hintergrund über der Seite */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    /* Halbtransparenter Hintergrund */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* Sehr weit vorne, damit es alles überdeckt */
+}
+
+/* Spinner selbst */
+.loader-spinner {
+    border: 8px solid #f3f3f3;
+    /* Leichtes Grau */
+    border-top: 8px solid #3498db;
+    /* Blaue "Spur" */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+/* Spinner-Animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
