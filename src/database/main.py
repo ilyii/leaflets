@@ -9,6 +9,7 @@ from create import DatabaseCreator
 from delete import DatabaseDeleter
 from queries import DatabaseQueries
 from extract_deals import DealExtractor
+from update_deal_metadata import DealMetadataUpdater
 
 def main():
     # Load configuration
@@ -34,6 +35,10 @@ def main():
         elif action == 'run_queries':
             queries = DatabaseQueries(config)
             queries.execute_query()
+
+        elif action == 'update_deal_metadata':
+            updater = DealMetadataUpdater(config)
+            updater.update_deal_metadata()
 
         else:
             raise ValueError(f"Unknown action: {action}")

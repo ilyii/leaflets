@@ -4,6 +4,7 @@ from .create import DatabaseCreator
 from .delete import DatabaseDeleter
 from .queries import DatabaseQueries
 from .extract_deals import DealExtractor
+from .update_deal_metadata import DealMetadataUpdater
 
 __all__ = [
     'Base',
@@ -13,5 +14,6 @@ __all__ = [
     'DatabaseCreator',
     'DatabaseDeleter',
     'DatabaseQueries',
-    'DealExtractor'
+    'DealExtractor',
+    'DealMetadataUpdater'
 ]
