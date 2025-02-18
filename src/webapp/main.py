@@ -296,8 +296,8 @@ async def process_deal(request: Request):
     # Use process_image to extract structured deal info from the cropped image
     # deal_info = process_image(crop_path, model="llama3.2-vision")
     # deal_info = process_image(crop_path, model="llama3.2-vision:11b-instruct-q8_0")
-    # deal_info = process_image(crop_path, model="minicpm-v")
-    deal_info = {}
+    deal_info = process_image(crop_path, model="minicpm-v")
+    # deal_info = {}
     extracted_info = f"""
     Brand: {deal_info.get("brand", "unknown")}<br>
     Product Name: {deal_info.get("productname", "unknown")}<br>
@@ -327,8 +327,7 @@ def get_preview_data(session_id: str):
         return JSONResponse({"error": "Session not found"}, status_code=404)
     return {"pages": SEGMENTATION_CACHE[session_id]}
 
-# if not os.path.exists("tmp"):
-#     os.makedirs("tmp")
+os.makedirs("tmp", exist_ok=True)
 app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
 def clear_tmp_folder():
@@ -339,5 +338,5 @@ def clear_tmp_folder():
 def clear_cache():
     SEGMENTATION_CACHE.clear()
 
-clear_tmp_folder()  # beim Start aufrufen
-clear_cache()  # beim Start aufrufen
+clear_tmp_folder()
+clear_cache()

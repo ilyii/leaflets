@@ -81,6 +81,9 @@ function renderPage() {
 
         drawPolygons(scaledPolygons, -1);
 
+        // Update the page indicator with current page and total pages
+        document.getElementById("pageIndicator").textContent = `Seite ${currentPageIndex + 1} von ${pagesData.length}`;
+
         canvasEl.onmousemove = e => handleMouseMove(e, scaledPolygons);
         canvasEl.onclick = e => handleMouseClick(e, scaledPolygons);
     };
@@ -139,14 +142,16 @@ function openModal(polyData) {
     modalText.innerHTML = text;
 
     // Check if extracting on demand is enabled
-    const extractCheckbox = document.getElementById("extractOnDemand");
-    if (extractCheckbox && extractCheckbox.checked) {
-        // Call backend to process deal image crop out
-        processDealExtraction(sessionId, currentPageIndex, highlightedPolygonIndex);
-    } else {
-        // Clear any previous crop
-        document.getElementById("dealCropContainer").innerHTML = "";
-    }
+    // const extractCheckbox = document.getElementById("extractOnDemand");
+    // if (extractCheckbox && extractCheckbox.checked) {
+    //     // Call backend to process deal image crop out
+    //     processDealExtraction(sessionId, currentPageIndex, highlightedPolygonIndex);
+    // } else {
+    //     // Clear any previous crop
+    //     document.getElementById("dealCropContainer").innerHTML = "";
+    // }
+
+    processDealExtraction(sessionId, currentPageIndex, highlightedPolygonIndex);
 }
 
 async function processDealExtraction(sessionId, pageIndex, polygonIndex) {

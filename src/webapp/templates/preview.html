@@ -1,21 +1,17 @@
-<!-- templates/preview.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Prospekt-Vorschau</h2>
-
-<label>
-    <input type="checkbox" id="extractOnDemand">
-    Extracting on demand
-</label>
-
-<button id="prevBtn">&#8678; Zurück</button>
-<span id="pageIndicator">Seite ? von ?</span>
-<button id="nextBtn">Weiter &#8680;</button>
-
-<div class="preview-container">
-    <img id="pageImage" />
-    <canvas id="overlayCanvas"></canvas>
+<div class="card preview-card">
+    <h2>Prospekt-Vorschau</h2>
+    <div class="navigation">
+        <button id="prevBtn" class="btn">&#8678; Zurück</button>
+        <span id="pageIndicator">Seite ? von ?</span>
+        <button id="nextBtn" class="btn">Weiter &#8680;</button>
+    </div>
+    <div class="preview-container">
+        <img id="pageImage" />
+        <canvas id="overlayCanvas"></canvas>
+    </div>
 </div>
 
 <!-- Modal -->
