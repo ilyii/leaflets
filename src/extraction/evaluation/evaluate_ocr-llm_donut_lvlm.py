@@ -88,14 +88,6 @@ ALIGNMENT_LABELS = {
 }
 
 
-# Conduct OCR of different models
-MODELS = {
-    "ppocr_ocr": "PaddleOCR",
-    "easyocr_ocr": "EasyOCR",
-    "tesseract_ocr": "Tesseract",
-    "doctr_ocr": "DocTR",
-    "donut_model": "Donut"
-}
 
 LABELS = {
     "brand": "Brand",
@@ -126,6 +118,49 @@ def df_label_alignment(df, alignment_labels=ALIGNMENT_LABELS):
     print(f"Datframe columns aligned to: {new_colnames}")
     return df
     
+
+def final_normalize_text(text):
+    REPLACEMENTS = {
+        "ä": "a", 
+        "ö": "o", 
+        "ü": "u", 
+        "ß": "ss", 
+        ",": ".", 
+        "€": "", 
+        "–": " ", 
+        "—": " ", 
+        "−": " ", 
+        "ô": "o", 
+        "é": "e", 
+        "ç": "c",
+        "è": "e",
+        "à": "a",
+        "ê": "e",
+        "â": "a",
+        "û": "u",
+        "î": "i",
+        "ë": "e",
+        "ï": "i",
+        "œ": "oe",
+        "æ": "ae",
+        "ù": "u",
+    }
+    for key, value in REPLACEMENTS.items():
+        text = text.replace(key, value)
+    text = "".join([char for char in text if char.isalnum() or char in {".", " "}])
+    text = "".join(text.split())
+    
+    text = text.strip().lower()
+    return text
+
+def final_normalize_prices(price_text):
+    # Replace commas with dots
+    price_text = price_text.replace(",", ".")
+    # Only keep numbers and dots
+    price_text = "".join([char for char in price_text if char.isdigit() or char == "."])
+    
+    return price_text
+
 
 
 # Preprocessing function
@@ -165,7 +200,7 @@ def extract_json(string):
 
 
 def get_images_by_name(root, imgnames):
-    imgnames = list(imgnames)
+    imgnames = [str(Path(name).stem) for name in imgnames]  
     imgpaths = np.ones(len(imgnames), dtype=object)
     for root, dirs, files in os.walk(root):
         for file in files:
@@ -182,118 +217,6 @@ def get_images_by_name(root, imgnames):
             imgpaths[idx] = None
             print("\t\t - "+imgnames[idx])
     return imgpaths
-
-
-
-def ppocr_ocr(img):
-    ocr = PaddleOCR(use_angle_cls=True, lang="en")
-    result = ocr.ocr(img, cls=True)
-    texts = [line[1][0] for line in result[0]]
-
-    return " ".join(texts)
-
-
-def easyocr_ocr(img):
-    reader = easyocr.Reader(["de", "en"])
-    result = reader.readtext(img, detail=0)
-    return " ".join(result)
-
-
-def tesseract_ocr(img):
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    pyt_config = "--psm 1 --oem 3 -l deu"
-    text = pytesseract.image_to_string(img, config=pyt_config)
-    return text
-
-
-def doctr_ocr(img):
-    model = ocr_predictor(pretrained=True)
-    result = model([img])
-    return result.render()
-
-
-
-
-def ocr(imgps):
-    print("Starting OCR...")
-    results = defaultdict(list)
-    for i_idx,imgp in enumerate(imgps):
-        if i_idx % 10 == 0:
-            print(f"[OCR] Processing... {(i_idx+1)}/{len(imgps)}", end="\r", flush=True)
-        if imgp is None:
-            print("Image at index", i_idx, "is None")
-            continue
-        if not os.path.exists(imgp):
-            print("Image path", imgp, "does not exist")
-            continue
-        try:
-            img = cv2.cvtColor(cv2.imread(imgp), cv2.COLOR_BGR2RGB)
-        except Exception as e:
-            print("Error in reading image", imgp, ":", e)
-            continue
-        results["img_path"].append(imgp)
-        for model in MODELS.keys():
-            try:
-                res = globals()[model](img)
-                results[model].append(res)
-                # print(f"Model {model}: {res}")
-            except Exception as e:
-                print(f"Error in {model}: {e}\n{traceback.format_exc()}")
-                break
-    print("[OCR] Completed.")
-    return results
-
-
-
-def prompt_lmstudio(ocr_res, model):
-
-    llm = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="lm-studio")
-    messages = ([SYSTEM_TEMPLATE,{"role": "user", "content": f"OCR Input: {ocr_res}\nJSON OUTPUT:"}])
-    llm_response = llm.chat.completions.create(
-        model=model, messages=messages).choices[0].message.content
-    return llm_response
-
-def prompt_ollama(ocr_res, model):
-    llm_response = chat(model=model, messages=[
-                        {
-                            "role":"system",
-                            "content": SYSTEM_TEMPLATE
-                        },
-                        {
-                            "role":"user",
-                            "content": f"OCR Input: {ocr_res}\nJSON OUTPUT:"
-
-                        }
-                    ],
-                    options={"temperature": 0}
-                    )
-    return llm_response.message.content
-
-
-def llm_prompting(ocr_res_df, llm_engine="ollama", llm_model="llama3.2"):
-    llm_responses = defaultdict(list)
-    idx = 0
-    for _,ocr_row in ocr_res_df.iterrows():
-
-        for model in ocr_row.keys()[1:]:
-            # LMSTUDIO
-            if llm_engine == "lmstudio":
-                llm_res = prompt_lmstudio(ocr_row[model], llm_model)
-            # OLLAMA
-            elif llm_engine == "ollama":
-                llm_res = prompt_ollama(ocr_row[model], llm_model)
-
-            # Find json with regex
-            llm_res = extract_json(llm_res) 
-
-            llm_responses[model].append(llm_res)
-
-        if idx % 10 == 0:
-            print(f"[LLM] Processing... {(idx+1)}/{len(ocr_res_df)}", end="\r", flush=True)
-        idx += 1
-
-    return llm_responses
-
 
 
 def out_to_dict(seq):
@@ -352,115 +275,43 @@ def get_donut_predictions(imgs, processor, model):
 
 
 # EVALUATION
-def evaluate(pred_df, target_df, preprocessing_level=3):
-    accuracies = defaultdict(lambda: defaultdict(list))
-    levdistances = defaultdict(lambda: defaultdict(list))
+def evaluate(pred_df, target_df):
+    accuracies = defaultdict(list)
+    levdistances = defaultdict(list)
+    pred_df = pred_df.sort_values("img_path").reset_index(drop=True)
+    target_df = target_df.sort_values("img_path").reset_index(drop=True)
 
     for pred_row, target_row in zip(pred_df.iterrows(), target_df.iterrows()):
         pred_row = pred_row[1]
         target_row = target_row[1]
-        for model in pred_row.keys():
-            if model == "img_path":
+        for entity in target_row.keys():
+            if entity == "img_path":
                 continue
-            for entity in target_row.keys():
-                if entity == "img_path":
-                    continue
-                
-                target_value = target_row[entity]
-                target_value = normalize_text(target_value, level=preprocessing_level)
-                target_value = "".join(target_value.split())
+            
+            target_value = target_row[entity]
+            target_value = final_normalize_text(str(target_value)) if entity not in ["deal_price", "original_price"] else final_normalize_prices(str(target_value))
+            target_value = "".join(target_value.split())
 
-                if pred_row[model] and entity in pred_row[model]:
-                    pred_value = pred_row[model][entity]
-                    pred_value = normalize_text(pred_value, level=preprocessing_level)
-                    pred_value = "".join(pred_value.split())
-
-                    accuracies[model][entity].append(1 if pred_value == target_value else 0)
-                    levdistances[model][entity].append(jellyfish.levenshtein_distance(pred_value, target_value))
-                else:
-                    accuracies[model][entity].append(0)
-                    levdistances[model][entity].append(len(target_value))
+            if entity in pred_row:
+                pred_value = pred_row[entity]
+                pred_value = final_normalize_text(str(pred_value)) if entity not in ["deal_price", "original_price"] else final_normalize_prices(str(pred_value))
+                pred_value = "".join(pred_value.split())
+                # print(f"Target: {target_value} | Pred: {pred_value}")
+                accuracies[entity].append(1 if pred_value == target_value else 0)
+                levdistances[entity].append(jellyfish.levenshtein_distance(pred_value, target_value))
+            else:
+                accuracies[entity].append(0)
+                levdistances[entity].append(len(target_value))
 
     return accuracies, levdistances
-
-
-def visualize_accuracies(accuracies, level):
-    sns.set_theme(style="whitegrid")
-    
-    data = []
-    for model, entity_acc in accuracies.items():
-        for entity, acc in entity_acc.items():
-            data.append((model, entity, np.mean(acc)))
-    
-    df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
-    
-    # Create grouped bar plot
-    fig, ax = plt.subplots(figsize=(14, 10))
-    sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
-    
-    ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Accuracy", fontsize=12)
-    ax.set_xlabel("Models", fontsize=12)
-    # Update xtick labels
-    ax.set_xticklabels([MODELS[model] for model in df["Model"].unique()], ha="center", fontsize=10)
-
-    # Update legend labels
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
-
-    # Add bar labels
-    for container in ax.containers:
-        ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
-
-    plt.tight_layout()
-    plt.savefig(f"accuracy_lv{level}.png", dpi=400, bbox_inches="tight")
-
-
-def visualize_levdistances(levdistances, level):
-    sns.set_theme(style="whitegrid")
-    
-    data = []
-    for model, entity_lev in levdistances.items():
-        for entity, lev in entity_lev.items():
-            data.append((model, entity, np.mean(lev)))
-    
-    df = pd.DataFrame(data, columns=["Model", "Entity", "Levenshtein Distance"])
-    
-    fig, ax = plt.subplots(figsize=(14, 10))
-    sns.barplot(data=df, x="Model", y="Levenshtein Distance", hue="Entity", ax=ax, palette="Set2")
-
-    ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Levenshtein Distance", fontsize=12)
-    ax.set_xlabel("Models", fontsize=12)
-
-    # Update xtick labels
-    ax.set_xticklabels([MODELS[model] for model in df["Model"].unique()], ha="center", fontsize=10)
-
-    # Update legend labels
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
-
-    # Add bar labels
-    for container in ax.containers:
-        ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
-
-    plt.tight_layout()
-    plt.savefig(f"levenshtein_lv{level}.png", dpi=400, bbox_inches="tight")
-
-
 
                     
 def main(level=1,
         PROJECT_DIR=None, 
          LABELS_PATH=None, 
-         LEAFLET_DIR=None, 
-         DB_PATH=None, 
          MODELS_DIR=None, 
-         LLM_RESULTS_PATH=None, 
-         DONUT_RESULTS_PATH=None,
-         OCR_RESULTS_PATH=None, 
-         LLM_ENGINE=None, 
-         LLM_MODEL=None):
+         RESULTS_PATHS=None,
+        ):
     """
     Args:
     -----
@@ -492,82 +343,183 @@ def main(level=1,
     labels_df = pd.read_csv(LABELS_PATH, dtype=DTYPES)
     # Manual img_path adjustment
     labels_df["img_path"] = [PROJECT_DIR+str(imgpath.split("leaflet_project")[1]) for imgpath in labels_df["img_path"]]
-    labels_df = labels_df[["img_path"] + [col for col in labels_df.columns if col != "img_path"]] # Ensure "img_path" is the first column
     if "img_name" in labels_df.columns:
         labels_df.drop("img_name", axis=1, inplace=True)
 
     # Align the column names
     labels_df = df_label_alignment(labels_df)
+    labels_df = labels_df[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+
+
+    DONUT_RESULTS= RESULTS_PATHS["DONUT_RESULTS_PATH"]
+    LVLM_RESULTS_1 = RESULTS_PATHS["LVLM_RESULTS_PATH_1"]
+    LVLM_RESULTS_2 = RESULTS_PATHS["LVLM_RESULTS_PATH_2"]
 
     
-    if DONUT_RESULTS_PATH:
-        donut_preds_df = pd.read_csv(DONUT_RESULTS_PATH)
+    if DONUT_RESULTS:
+        donut_preds_df = pd.read_csv(DONUT_RESULTS)
+        # Drop "img_name"
+        if "img_name" in donut_preds_df.columns:
+            donut_preds_df.drop("img_name", axis=1, inplace=True)
+        donut_preds_df["img_path"] = labels_df["img_path"]        
+        donut_preds_df = df_label_alignment(donut_preds_df) 
+        donut_preds_df = donut_preds_df[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
     else:
         processor, donutmodel = init_donut(os.path.join(MODELS_DIR, "donut_processor"), os.path.join(MODELS_DIR, "donut_deal_model"))
         donut_preds = get_donut_predictions(labels_df["img_path"], processor, donutmodel)
+        
         donut_preds_df = pd.DataFrame(donut_preds)
         donut_preds_df.to_csv("donut_preds.csv", index=False)
 
     # Align the column names
-    donut_preds_df = df_label_alignment(donut_preds_df)
+    llm_responses_1 = pickle.load(open(RESULTS_PATHS["LLM_RESULTS_PATH_1"], "rb"))
+    
+    llm_responses_2 = pickle.load(open(RESULTS_PATHS["LLM_RESULTS_PATH_2"], "rb"))
 
-
-    if OCR_RESULTS_PATH:
-        ocr_results_df = pd.read_csv(OCR_RESULTS_PATH)
-    else:
-        ocr_results = ocr(labels_df["img_path"])
-        ocr_results_df = pd.DataFrame(ocr_results)
-        ocr_results_df.to_csv("ocr_results.csv", index=False) # Save the results to a CSV file (CHANGE PATH)
-
-    # Adding preprocessing to the ocr results
-    for col in ocr_results_df.columns:
-        if col == "img_path":
-            continue
-        ocr_results_df[col] = ocr_results_df[col].apply(lambda x: normalize_text(x, level=level))
-
-    if LLM_RESULTS_PATH:
-        llm_responses = pickle.load(open(LLM_RESULTS_PATH, "rb"))
-    else:
-        llm_responses = llm_prompting(ocr_results_df, LLM_ENGINE, LLM_MODEL)
-        date = datetime.now().strftime("%d_%m")
-        pickle.dump(llm_responses, open(f"llm_results_{LLM_MODEL}_{date}.pkl", "wb"))
-
+    def str2dict(string):
+        return {match.group(1): match.group(2) for match in re.finditer(r"\"(.*?)\": \"(.*?)\"", string)}
     # Resolve the labels in the LLM responses dataframe to match with donut's labels.
-    llm_responses_df = defaultdict(list)
-    for _,row in pd.DataFrame(llm_responses).iterrows():
-        for col in row.keys():
-            if col == "img_path":
-                continue
-            else:
-                new_keys = []
-                if not row[col]:
-                    llm_responses_df[col].append({})
+    def resolve_labels_llms(llm_responses):
+        llm_responses_df = defaultdict(list)
+        for _,row in pd.DataFrame(llm_responses).iterrows():
+            for col in row.keys():
+                if col == "img_path":
                     continue
+                else:
+                    new_keys = []
+                    if not row[col]:
+                        llm_responses_df[col].append({})
+                        continue
+                    if not isinstance(row[col], dict):              
+                        row[col] = str2dict(row[col])                        
+                    for key in row[col].keys():
+                        for entity, values in ALIGNMENT_LABELS.items():
+                            if key.lower() in values:
+                                new_keys.append(entity)
+                                break
+                        else:
+                            new_keys.append(key)
+                
+                    llm_responses_df[col].append({new_keys[idx]: val for idx,val in enumerate(row[col].values())})
 
-                    
-                for key in row[col].keys():
-                    for entity, values in ALIGNMENT_LABELS.items():
-                        if key.lower() in values:
-                            new_keys.append(entity)
-                            break
-                    else:
-                        new_keys.append(key)
-            
-                llm_responses_df[col].append({new_keys[idx]: val for idx,val in enumerate(row[col].values())})
-    llm_responses_df = pd.concat([pd.DataFrame(llm_responses_df), pd.DataFrame({"img_path": ocr_results_df["img_path"]})], axis=1)
+        return pd.DataFrame(llm_responses_df)
+    
+    targetcsv = pd.read_csv("target.csv")
+    targetcsv = targetcsv[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+    llm_responses_df_1 = resolve_labels_llms(llm_responses_1)
+    llm_res_1_best_ocr = llm_responses_df_1["doctr_ocr"].to_dict()
+    llm_res_1_best_ocr_df = pd.DataFrame(llm_res_1_best_ocr).T
+    llm_res_1_best_ocr_df["img_path"] = targetcsv["img_path"]
+    llm_res_1_best_ocr_df = llm_res_1_best_ocr_df[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+    
+    llm_responses_df_2 = resolve_labels_llms(llm_responses_2)
+    llm_res_2_best_ocr = llm_responses_df_2["doctr_ocr"].to_dict()
+    llm_res_2_best_ocr_df = pd.DataFrame(llm_res_2_best_ocr).T
+    llm_res_2_best_ocr_df["img_path"] = targetcsv["img_path"]
+    llm_res_2_best_ocr_df = llm_res_2_best_ocr_df[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+
+    lvlm_responses_1 = pd.read_csv(LVLM_RESULTS_1)
+    lvlm_responses_1["img_path"] = get_images_by_name(r"D:\OneDrives\OneDrive\Gabrilyi\leaflet_project\deals",lvlm_responses_1["img_name"])
+    lvlm_responses_1.drop("img_name", axis=1, inplace=True)
+    lvlm_responses_1 = df_label_alignment(lvlm_responses_1)
+    lvlm_responses_1 = lvlm_responses_1[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+    lvlm_responses_1 = lvlm_responses_1.sort_values("img_path").reset_index(drop=True)
+    # Get only the rows that are in labels_df
+    lvlm_responses_1 = lvlm_responses_1[lvlm_responses_1["img_path"].isin(labels_df["img_path"])]
+
+
+    lvlm_responses_2 = pd.read_csv(LVLM_RESULTS_2)
+    lvlm_responses_2["img_path"] = get_images_by_name(r"D:\OneDrives\OneDrive\Gabrilyi\leaflet_project\deals", lvlm_responses_2["img_name"])
+    lvlm_responses_2.drop("img_name", axis=1, inplace=True)
+    lvlm_responses_2 = df_label_alignment(lvlm_responses_2)
+    lvlm_responses_2 = lvlm_responses_2[["img_path", "product_name", "brand", "deal_price", "original_price", "weight"]]
+    lvlm_responses_2 = lvlm_responses_2.sort_values("img_path").reset_index(drop=True)
+    # Get only the rows that are in labels_df
+    lvlm_responses_2 = lvlm_responses_2[lvlm_responses_2["img_path"].isin(labels_df["img_path"])]
                         
+    # 2. Evaluate the models
+    print("Evaluating Donut...")
+    accuracies_donut, levdistances_donut = evaluate(donut_preds_df, labels_df)
+    print("Evaluating LLM 1...")
+    accuracies_llm_1, levdistances_llm_1 = evaluate(llm_res_1_best_ocr_df, targetcsv)
+    print("Evaluating LLM 2...")
+    accuracies_llm_2, levdistances_llm_2 = evaluate(llm_res_2_best_ocr_df, targetcsv)
+    print("Evaluating LVLM 1...")
+    accuracies_lvlm_1, levdistances_lvlm_1 = evaluate(lvlm_responses_1, labels_df)
+    print("Evaluating LVLM 2...")
+    accuracies_lvlm_2, levdistances_lvlm_2 = evaluate(lvlm_responses_2, labels_df)
 
-    # Merge llm preds and donut as column: "donut_model" = [{dict predictions}]
-    donut_preds_dict = [{col: donut_preds_df[col].iloc[idx] for col in donut_preds_df.columns} for idx in range(len(donut_preds_df))]
-    preds_df = pd.concat([llm_responses_df, pd.DataFrame({"donut_model": donut_preds_dict})], axis=1)
 
-    # extraction evaluation
-    print("Evalution:")
-    accuracies, levdistances = evaluate(preds_df, labels_df, preprocessing_level=level)
+    MODELS ={
+        "donut": "Donut",
+        "llm_1": "docTR + Qwen 2.5 [7b, Q4]",
+        "llm_2": "docTR + Llama 3.1 [8b, Q4]",
+        "lvlm_1": "MiniCPM-V",
+        "lvlm_2": "Llama3.2-Vision"
+    }
+    accuracies_results = {
+        "donut": accuracies_donut,
+        "llm_1": accuracies_llm_1,
+        "llm_2": accuracies_llm_2,
+        "lvlm_1": accuracies_lvlm_1,
+        "lvlm_2": accuracies_lvlm_2
+    }
 
-    # Plotting
-    visualize_accuracies(accuracies, level)
-    visualize_levdistances(levdistances, level)
+    levdistances_results = {
+        "donut": levdistances_donut,
+        "llm_1": levdistances_llm_1,
+        "llm_2": levdistances_llm_2,
+        "lvlm_1": levdistances_lvlm_1,
+        "lvlm_2": levdistances_lvlm_2
+    }
+
+    def visualize_accuracies_comparsion(model_list, accuracies_results_dict, outname):
+        sns.set_theme(style="whitegrid")
+        data = []
+        for model in model_list:
+            for entity, acc in accuracies_results_dict[model].items():
+                data.append((model, entity, np.mean(acc)))
+        df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
+        fig, ax = plt.subplots(figsize=(14, 10))
+        sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
+        ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
+        ax.set_ylabel("Accuracy", fontsize=12)
+        ax.set_xlabel("Models", fontsize=12)
+        ax.set_xticklabels([MODELS[model] for model in model_list], ha="center", fontsize=10)
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
+        for container in ax.containers:
+            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        plt.tight_layout()
+        plt.savefig(outname, dpi=400, bbox_inches="tight")
+
+    def visualize_levdistances_comparsion(model_list, levdistances_results_dict, outname):
+        sns.set_theme(style="whitegrid")
+        data = []
+        for model in model_list:
+            for entity, lev in levdistances_results_dict[model].items():
+                data.append((model, entity, np.mean(lev)))
+        df = pd.DataFrame(data, columns=["Model", "Entity", "Levenshtein Distance"])
+        fig, ax = plt.subplots(figsize=(14, 10))
+        sns.barplot(data=df, x="Model", y="Levenshtein Distance", hue="Entity", ax=ax, palette="Set2")
+        ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
+        ax.set_ylabel("Levenshtein Distance", fontsize=12)
+        ax.set_xlabel("Models", fontsize=12)
+        ax.set_xticklabels([MODELS[model] for model in model_list], ha="center", fontsize=10)
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
+        for container in ax.containers:
+            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        plt.tight_layout()
+        plt.savefig(outname, dpi=400, bbox_inches="tight")
+
+    visualize_accuracies_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], accuracies_results, "accuracies_norm.png")
+    visualize_levdistances_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], levdistances_results, "levdistances_norm.png")
+
+
+
+
+
 if __name__ == "__main__":
     
     load_dotenv()
@@ -577,20 +529,17 @@ if __name__ == "__main__":
     args = {
         "PROJECT_DIR": PROJECT_DIR,
         "LABELS_PATH": os.path.join(PROJECT_DIR, "information_extraction", "val_deals.csv"),
-        "LEAFLET_DIR": os.path.join(PROJECT_DIR, "crawled_leaflets"),
-        "DB_PATH": os.path.join(PROJECT_DIR, "crawled_leaflets", "supermarket_leaflets.db"),
         "MODELS_DIR": os.path.join(PROJECT_DIR, "models"),
 
-        "LLM_RESULTS_PATH": os.path.join(RESULTS_DIR,"llm_results_17_02.pkl"),
-        "DONUT_RESULTS_PATH": os.path.join(RESULTS_DIR,"donut_results_17_02.csv"),
-        "OCR_RESULTS_PATH": os.path.join(RESULTS_DIR,"ocr_results_17_02.csv"),
-
-        "LLM_ENGINE": "ollama",
-        "LLM_MODEL": "llama3.2"
-
+        "RESULTS_PATHS":{
+            "LLM_RESULTS_PATH_1": os.path.join(RESULTS_DIR,"llm_results_qwen2.5_7b.pkl"),
+            "LLM_RESULTS_PATH_2": os.path.join(RESULTS_DIR,"llm_results_llama3.1_8b.pkl"),
+            "DONUT_RESULTS_PATH": os.path.join(RESULTS_DIR,"donut_results.csv"),
+            "LVLM_RESULTS_PATH_1": os.path.join(RESULTS_DIR,"vlm_results","llama3_2-vision_results.csv"),
+            "LVLM_RESULTS_PATH_2": os.path.join(RESULTS_DIR,"vlm_results","minicpm-v_results.csv"),
+        }
 
     }
 
-    for level in range(1,4):
-        args["level"] = level
-        main(**args)
+    args["level"] = "1"
+    main(**args)

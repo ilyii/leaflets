@@ -442,11 +442,7 @@ def visualize_levdistances(levdistances, outname):
 def main(level=1,
         PROJECT_DIR=None, 
          LABELS_PATH=None, 
-         LEAFLET_DIR=None, 
-         DB_PATH=None, 
-         MODELS_DIR=None, 
-         LLM_RESULTS_PATH=None, 
-         DONUT_RESULTS_PATH=None,
+         RESULTS_DIR=None, 
          OCR_RESULTS_PATH=None, 
          LLM_ENGINE=None, 
          LLM_MODELS=None):
@@ -511,13 +507,13 @@ def main(level=1,
     for model_name in LLM_MODELS:
         model_out_name = model_name.replace(":","_")
         outpath = f"llm_results_{model_out_name}.pkl"
-        if not os.path.exists(outpath):
+        if not os.path.exists(os.path.join(RESULTS_DIR, outpath)):
             print(f"Prompting LLM {model_out_name}...")
             llm_responses = llm_prompting(ocr_results_df, LLM_ENGINE, model_name)            
             pickle.dump(llm_responses, open(f"llm_results_{model_out_name}.pkl", "wb"))
         else:
             print(f"Results for LLM {model_out_name} already exist. Loading...")
-            llm_responses = pickle.load(open(outpath, "rb"))
+            llm_responses = pickle.load(open(os.path.join(RESULTS_DIR, outpath), "rb"))
         llm_responses_list.append(llm_responses)
 
 
@@ -584,6 +580,9 @@ def main(level=1,
             print(entity_acc, llmmodel)
             avg_accuracies_per_llm[ocrmodel][llmmodel] = np.mean([np.mean(acc) for acc in entity_acc.values()])
 
+    for ocrmodel, levdistances in levdistances_dict.items():
+        for llmmodel, entity_lev in levdistances.items():
+            avg_levdistances_per_llm[ocrmodel][llmmodel] = np.mean([np.mean(lev) for lev in entity_lev.values()])
 
 
     
@@ -595,21 +594,21 @@ def main(level=1,
             for entity, acc in entity_acc.items():
                 data.append((model, entity, np.mean(acc)))
         
-        df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
+        df = pd.DataFrame(data, columns=["Model", "LLM", "Accuracy"])
         
         # Create grouped bar plot
         fig, ax = plt.subplots(figsize=(14, 10))
-        sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
+        sns.barplot(data=df, x="LLM", y="Accuracy", hue="Model", ax=ax, palette="Set2")
         
         # ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
         ax.set_ylabel("Accuracy", fontsize=12)
-        ax.set_xlabel("Models", fontsize=12)
+        ax.set_xlabel("LLM", fontsize=12)
         # Update xtick labels
-        ax.set_xticklabels([OCRMODELS_MAPPING[model] for model in df["Model"].unique()], ha="center", fontsize=10)
+        ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["LLM"].unique()], ha="center", fontsize=10)
 
         # Update legend labels
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity")
+        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR")
 
         # Add bar labels
         for container in ax.containers:
@@ -627,21 +626,21 @@ def main(level=1,
             for entity, lev in entity_lev.items():
                 data.append((model, entity, np.mean(lev)))
         
-        df = pd.DataFrame(data, columns=["Model", "Entity", "Levenshtein Distance"])
+        df = pd.DataFrame(data, columns=["Model", "LLM", "Levenshtein Distance"])
         
         fig, ax = plt.subplots(figsize=(14, 10))
-        sns.barplot(data=df, x="Model", y="Levenshtein Distance", hue="Entity", ax=ax, palette="Set2")
+        sns.barplot(data=df, x="LLM", y="Levenshtein Distance", hue="Model", ax=ax, palette="Set2")
 
         # ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
         ax.set_ylabel("Levenshtein Distance", fontsize=12)
-        ax.set_xlabel("Models", fontsize=12)
+        ax.set_xlabel("LLM", fontsize=12)
 
         # Update xtick labels
-        ax.set_xticklabels([OCRMODELS_MAPPING[model] for model in df["Model"].unique()], ha="center", fontsize=10)
+        ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["LLM"].unique()], ha="center", fontsize=10)
 
         # Update legend labels
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity")
+        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR")
 
         # Add bar labels
         for container in ax.containers:
@@ -663,6 +662,7 @@ if __name__ == "__main__":
 
     args = {
         "PROJECT_DIR": PROJECT_DIR,
+        "RESULTS_DIR": RESULTS_DIR,
         "LABELS_PATH": os.path.join(RESULTS_DIR, "val_deals.csv"),
 
         # "LLM_RESULTS_PATH": os.path.join(RESULTS_DIR,"llm_results_17_02.pkl"),
