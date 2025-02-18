@@ -26,9 +26,8 @@
         const fileInput = document.getElementById("pdfFile");
         if (!fileInput.files.length) return;
 
-        // 1. Ladeanzeige einblenden
+        // show loader
         loader.style.display = "block";
-
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
 
@@ -37,13 +36,14 @@
                 method: "POST",
                 body: formData
             });
+            // wait for response
             const data = await res.json();
 
-            // 2. Ladeanzeige ausblenden
+            // finish loader
             loader.style.display = "none";
 
             if (data.session_id) {
-                // Weiterleitung zur Preview-Seite
+                // when a session ID is received, redirect to preview page
                 window.location.href = `/preview?session_id=${data.session_id}`;
             } else {
                 resultDiv.textContent = "Fehler: Keine Session ID erhalten.";

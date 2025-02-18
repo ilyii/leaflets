@@ -5,46 +5,51 @@
 
 <h2>Deals Übersicht</h2>
 
-<!-- Suchleiste -->
 <input type="text" id="searchInput" placeholder="Suche nach Produktname..." />
 <button onclick="fetchDeals()">Suchen</button>
 
-<!-- Checkbox: Nur Deals mit Metadaten -->
 <label>
-    <input type="checkbox" id="metadataOnly" onchange="fetchDeals()" />
+    <input type="checkbox" id="metadataOnly" onchange="fetchDeals()" checked="True" />
     Nur Deals mit Metadaten
 </label>
 
-<!-- Filter Supermarkt -->
 <select id="supermarketSelect" onchange="fetchDeals()">
     <option value="">Alle Supermärkte</option>
-    <option value="Lidl">Lidl</option>
-    <option value="Aldi">Aldi</option>
-    <!-- ggf. weitere -->
+    {% for supermarket in supermarkets %}
+    <option value="{{ supermarket }}">{{ supermarket }}</option>
+    {% endfor %}
 </select>
 
-<!-- Filter gültig (valid_only) -->
 <label>
     <input type="checkbox" id="validOnly" onchange="fetchDeals()" />
     Nur aktuell gültige
 </label>
 
-<!-- Sortierung nach Datum -->
 <label>
     <input type="checkbox" id="sortByDate" onchange="fetchDeals()" />
     Nach Datum sortieren
 </label>
 
-<!-- Grid Container -->
 <div id="dealsContainer" class="grid-container">
-    <!-- Deals werden per JavaScript gerendert -->
+    <!-- deal-cards will be inserted here -->
 </div>
 
-<!-- Pagination -->
-<button onclick="prevPage()">Zurück</button>
-<span id="pageNum">1</span>
-<button onclick="nextPage()">Weiter</button>
+<div id="paginationArea">
+    <button onclick="prevPage()">Zurück</button>
+    <span id="pageNum">1</span>
+    <button onclick="nextPage()">Weiter</button>
+</div>
 
 <script src="/static/js/app.js"></script>
+
+<!-- Deal Modal -->
+<div id="dealModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeDealModal" class="close">&times;</span>
+        <div id="dealModalContent">
+            <!-- More details will be inserted here -->
+        </div>
+    </div>
+</div>
 
 {% endblock %}

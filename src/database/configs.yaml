@@ -43,7 +43,7 @@ extract_deals:
 ##############################
 update_deal_metadata:
   force_recreate: true
-  deal_metadata_path: "$$PROJECT_DIR$$/labeled_deals_all.csv"
+  deal_metadata_path: "$$PROJECT_DIR$$/information_extraction/labeled_deals_all.csv"
 
 ######################
 #### delete_deals ####

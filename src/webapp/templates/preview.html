@@ -4,6 +4,11 @@
 {% block content %}
 <h2>Prospekt-Vorschau</h2>
 
+<label>
+    <input type="checkbox" id="extractOnDemand">
+    Extracting on demand
+</label>
+
 <button id="prevBtn">&#8678; Zurück</button>
 <span id="pageIndicator">Seite ? von ?</span>
 <button id="nextBtn">Weiter &#8680;</button>
@@ -19,6 +24,8 @@
         <span id="closeModal" class="close">&times;</span>
         <h2 id="modalTitle">Details</h2>
         <p id="modalText"></p>
+        <!-- Container for the cropped deal image and extracted metadata -->
+        <div id="dealCropContainer"></div>
     </div>
 </div>
 

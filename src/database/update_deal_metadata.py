@@ -56,10 +56,11 @@ class DealMetadataUpdater:
             metadata_df.iterrows(), total=len(metadata_df), desc="Updating metadata"
         ):
             # img_name is with .png extension
+            deal_image_name = row["img_name"]
+            deal_image_name = deal_image_name + ".png" if not deal_image_name.endswith(".png") else deal_image_name
 
             if not self.force_recreate:
                 # check if deal already exists
-                deal_image_name = row["img_name"]
                 deal = self.db_queries._query_db(
                     "SELECT * FROM deals WHERE img_name = :deal_image_name",
                     {"deal_image_name": deal_image_name},
@@ -67,7 +68,6 @@ class DealMetadataUpdater:
                 if deal:
                     continue
 
-            deal_image_name = row["img_name"]
             deal_brand = row["Marke"]
             deal_product = row["Produktname"]
             deal_original_price = row["Original Preis"]

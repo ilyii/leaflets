@@ -4,7 +4,7 @@ let currentPageIndex = 0;
 let pageImageEl;
 let canvasEl;
 let ctx;
-let highlightedPolygonIndex = -1; // Index des Polygons, das gerade gehighlightet ist
+let highlightedPolygonIndex = -1;
 
 let modal;
 let modalTitle;
@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("prevBtn").addEventListener("click", prevPage);
     document.getElementById("nextBtn").addEventListener("click", nextPage);
 
-    // Modal schließen
     closeModalBtn.onclick = () => { modal.style.display = "none"; };
     window.onclick = (evt) => {
         if (evt.target === modal) {
@@ -32,7 +31,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     };
 
-    // Daten vom Server laden
     await loadPreviewData();
     renderPage();
 });
@@ -57,25 +55,19 @@ function renderPage() {
     const imgSrc = `/tmp/${pageData.page_image}`;
     pageImageEl.src = imgSrc;
 
-    // Wenn das Bild geladen ist
     pageImageEl.onload = () => {
-        // Canvas anpassen
         canvasEl.width = pageImageEl.width;
         canvasEl.height = pageImageEl.height;
 
-        // Originalgröße laut Server
         const origWidth = pageData.original_size[0];
         const origHeight = pageData.original_size[1];
 
-        // Aktuelle Anzeigegröße
         const dispWidth = pageImageEl.width;
         const dispHeight = pageImageEl.height;
 
-        // Skalierungsfaktoren
         const ratioX = dispWidth / origWidth;
         const ratioY = dispHeight / origHeight;
 
-        // Polygone runterskalieren
         const scaledPolygons = pageData.polygons.map(det => {
             const scaledPoly = det.polygon.map(([x, y]) => {
                 return [x * ratioX, y * ratioY];
@@ -87,14 +79,10 @@ function renderPage() {
             };
         });
 
-        // Zeichnen
         drawPolygons(scaledPolygons, -1);
 
-        // Mouse-Events
         canvasEl.onmousemove = e => handleMouseMove(e, scaledPolygons);
         canvasEl.onclick = e => handleMouseClick(e, scaledPolygons);
-
-        // ...
     };
 }
 
@@ -110,13 +98,12 @@ function drawPolygons(polygons, highlightIndex) {
         }
         ctx.closePath();
 
-        // Farbe wählen
         if (idx === highlightIndex) {
-            ctx.fillStyle = "rgba(255, 0, 0, 0.3)"; // Rote Füllung mit Transparenz
+            ctx.fillStyle = "rgba(255, 0, 0, 0.23)";
             ctx.strokeStyle = "red";
             ctx.lineWidth = 2;
         } else {
-            ctx.fillStyle = "rgba(0, 255, 0, 0.2)"; // Grüne Füllung
+            ctx.fillStyle = "rgba(0, 255, 0, 0.15)";
             ctx.strokeStyle = "lime";
             ctx.lineWidth = 1;
         }
@@ -127,7 +114,6 @@ function drawPolygons(polygons, highlightIndex) {
 
 function handleMouseMove(evt, polygons) {
     const mousePos = getMousePos(canvasEl, evt);
-    // Test, ob Maus in Polygon
     const foundIndex = polygons.findIndex((p) =>
         isPointInPolygon(mousePos, p.polygon)
     );
@@ -140,24 +126,58 @@ function handleMouseMove(evt, polygons) {
 function handleMouseClick(evt, polygons) {
     if (highlightedPolygonIndex < 0) return;
     const polyData = polygons[highlightedPolygonIndex];
-    // Modal anzeigen
     openModal(polyData);
 }
 
 function openModal(polyData) {
     modal.style.display = "block";
     modalTitle.innerText = polyData.label || "Kein Label";
-    // Zeige Metadaten an
     let text = "";
     for (const [k, v] of Object.entries(polyData.meta || {})) {
         text += `${k}: ${v}<br/>`;
     }
     modalText.innerHTML = text;
+
+    // Check if extracting on demand is enabled
+    const extractCheckbox = document.getElementById("extractOnDemand");
+    if (extractCheckbox && extractCheckbox.checked) {
+        // Call backend to process deal image crop out
+        processDealExtraction(sessionId, currentPageIndex, highlightedPolygonIndex);
+    } else {
+        // Clear any previous crop
+        document.getElementById("dealCropContainer").innerHTML = "";
+    }
 }
 
-/**
- * Hilfsfunktion: Position der Maus relativ zum Canvas ermitteln
- */
+async function processDealExtraction(sessionId, pageIndex, polygonIndex) {
+    try {
+        const res = await fetch("/api/process_deal", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                page_index: pageIndex,
+                polygon_index: polygonIndex
+            })
+        });
+        const data = await res.json();
+        if (data.crop_image) {
+            // Display the cropped image and placeholder metadata in the modal
+            const dealCropContainer = document.getElementById("dealCropContainer");
+            dealCropContainer.innerHTML = `
+                <img src="/tmp/${data.crop_image}" alt="Deal Crop" style="max-width:100%; margin-top:1rem;"/>
+                <p>${data.extracted_info}</p>
+            `;
+        } else {
+            console.error("No crop image received");
+        }
+    } catch (error) {
+        console.error("Error processing deal extraction:", error);
+    }
+}
+
 function getMousePos(canvas, evt) {
     const rect = canvas.getBoundingClientRect();
     return {
@@ -166,10 +186,6 @@ function getMousePos(canvas, evt) {
     };
 }
 
-/**
- * Point in Polygon (Ray casting oder Winding rule)
- * Hier eine einfache Implementierung
- */
 function isPointInPolygon(pt, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -182,7 +198,6 @@ function isPointInPolygon(pt, polygon) {
     return inside;
 }
 
-// Blättern
 function nextPage() {
     if (currentPageIndex < pagesData.length - 1) {
         currentPageIndex++;

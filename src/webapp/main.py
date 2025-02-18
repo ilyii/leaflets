@@ -11,76 +11,60 @@ from datetime import datetime
 import uuid
 from tqdm import tqdm
 
-# YOLO
 from ultralytics import YOLO
-# PDF -> Images
 from pdf2image import convert_from_path
+from PIL import Image, ImageDraw  # Ensure ImageDraw is imported
+from deal_processing import process_image  # import process_image from deal_processing.py
 
-# -------------------------------------------------------------------
-# Globale Variablen / "In-Memory-Speicher" für Demo
-# -------------------------------------------------------------------
-# Wir speichern Segmentationsergebnisse in einem Dictionary:
-# { session_id: [ { "page_image": "...", "detections": [ ... ] }, ... ] }
-# In einer echten Applikation würdest du vermutlich einen persistenten Speicher verwenden
-# oder das Ergebnis nach einer Zeit verwerfen.
 SEGMENTATION_CACHE = {}
 
-# -------------------------------------------------------------------
-# Projektordner aus .env laden
-# -------------------------------------------------------------------
 load_dotenv(override=True)
 
 PROJECT_DIR = os.getenv("PROJECT_DIR", ".")
 DB_PATH = os.path.join(PROJECT_DIR, "crawled_leaflets", "supermarket_leaflets.db")
 MODELS_DIR = os.path.join(PROJECT_DIR, "models")
 DEALS_DIR = os.path.join(PROJECT_DIR, "deals")
-YOLOV11_PATH = r"./models/model.pt"
 
-# Erstelle FastAPI-App
 app = FastAPI()
-model = YOLO(YOLOV11_PATH, verbose=False)
 
-# Static Files (CSS, JS etc.)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount(
     "/onedrive-images",
     StaticFiles(directory=DEALS_DIR),
     name="onedrive-images"
 )
+YOLOV11_PATH = os.path.join(MODELS_DIR, "model.pt")
+model = YOLO(YOLOV11_PATH, verbose=False)
 
 all_images = {}
 
 for root, dirs, files in tqdm(os.walk(DEALS_DIR), desc="Loading image paths"):
     for file in files:
         if file.endswith(".png") and "annotated" not in file:
-            # also replace DEALS_DIR with /onedrive-images/dirs_to_file/file
             all_images[file] = f"/onedrive-images{root.replace(DEALS_DIR, '')}/{file}"
 
-# Templates (Jinja2)
 templates = Jinja2Templates(directory="templates")
 
-# SQLite-Verbindung
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# -------------------------------------------------------------------
-# Hauptseite -> index.html
-# -------------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    """
-    Rendert die Hauptseite (index.html).
-    """
+    # return a list of all supermarket names to filter by
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM supermarket")
+    supermarkets = cursor.fetchall()
+    conn.close()
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "title": "Deals Übersicht"
+        "title": "Deals Übersicht",
+        "supermarkets": [supermarket["name"] for supermarket in supermarkets]
     })
 
-# -------------------------------------------------------------------
-# Deals-API-Endpunkt -> Filtern, Sortieren, Pagination
-# -------------------------------------------------------------------
+
 @app.get("/api/deals")
 async def get_deals(
     page: int = 1,
@@ -90,9 +74,6 @@ async def get_deals(
     metadata_only: bool = False,
     sort_by_date: bool = False
 ):
-    """
-    Liefert Deals als JSON für das Frontend (AJAX-Call).
-    """
     clear_tmp_folder()
     clear_cache()
     conn = get_db_connection()
@@ -112,37 +93,31 @@ async def get_deals(
 
     params = []
 
-    # Suche
     if search:
         base_query += " AND d.clean_title LIKE ?"
         params.append(f"%{search}%")
 
-    # Filter Supermarkt
     if supermarket:
         base_query += " AND s.name = ?"
         params.append(supermarket)
 
-    # Nur gültige Deals
     if valid_only:
         today = datetime.now().date().isoformat()
         base_query += " AND l.valid_from_date <= ? AND l.valid_to_date >= ?"
         params.append(today)
         params.append(today)
 
-    # Nur Deals mit Metadaten
     if metadata_only:
         base_query += """
         AND (d.clean_title != '' OR d.price != '' OR d.price_old != '' OR d.description != '')
         """
 
-    # Sortierung
     if sort_by_date:
         base_query += " ORDER BY l.valid_from_date DESC"
     else:
         base_query += " ORDER BY d.rowid DESC"
 
-    # Pagination
-    limit = 20
+    limit = 15
     offset = (page - 1) * limit
     base_query += f" LIMIT {limit} OFFSET {offset}"
 
@@ -154,112 +129,173 @@ async def get_deals(
     # edit img_name to full path
     for deal in ret_dict["deals"]:
         deal["img_name"] = all_images.get(deal["img_name"], None)
-        print(deal["img_name"])
     return ret_dict
 
 # -------------------------------------------------------------------
-# Upload-Seite -> upload.html
-# -------------------------------------------------------------------
+
 @app.get("/upload", response_class=HTMLResponse)
 async def get_upload_page(request: Request):
-    """
-    Seite zum Hochladen eines Prospekt-PDFs.
-    """
     return templates.TemplateResponse("upload.html", {
         "request": request,
         "title": "Prospekt Upload"
     })
 
-# -------------------------------------------------------------------
-# POST /api/upload_pdf: PDF entgegennehmen, YOLO ausführen (Demo)
-# -------------------------------------------------------------------
 @app.post("/api/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
-    """
-    1. PDF entgegennehmen
-    2. Konvertieren in Bilder
-    3. YOLO-Segmentation (Polygone) ausführen
-    4. Ergebnisse im In-Memory-Cache speichern
-    5. session_id zurückgeben
-    """
-    # 1. PDF speichern
+    # 1. save pdf
     pdf_contents = await file.read()
     filename = file.filename
     pdf_path = os.path.join("tmp", filename)
     with open(pdf_path, "wb") as f:
         f.write(pdf_contents)
 
-    # 2. PDF -> einzelne Seiten (Liste von PIL-Images)
+    # 2. convert pdf to images
     pages = convert_from_path(pdf_path)
-
-    # Neue Session anlegen
+    # new unique session_id for this pdf
     session_id = str(uuid.uuid4())
     SEGMENTATION_CACHE[session_id] = []
 
-    # 3. Jede Seite in PNG speichern + YOLO-Prediction
+    # 3. process each page with YOLO and (optionally later) to structured text...
     for idx, page_img in tqdm(enumerate(pages), desc="Processing PDF pages"):
         image_filename = f"{session_id}_page_{idx+1}.png"
         image_path = os.path.join("tmp", image_filename)
         page_img.save(image_path, "PNG")
 
-        # YOLO auf diese Seite anwenden
         results_list = model(
-            image_path,
-            # iou=0.75,
+            page_img,
+            iou=0.4,
+            conf=0.5,
             # half=True,
             device="cuda:0",
             verbose=False
         )
 
-        # YOLO v8 gibt ein List[Results],
-        # für ein einzelnes Bild ist meist nur results_list[0] relevant
+        # batch size = 1, so we only have one result
         results = results_list[0]
-
-        # Hier liegen die Polygone (Segmentation) in results.masks.xy
-        # - results.masks.xy ist eine Liste von NumPy-Arrays (jeweils Nx2)
-        # - results.boxes.cls sind die Klassen-IDs
-        # - results.boxes.conf sind die Konfidenzen
-        # - results.names ist ein dict ID->Label
         polygons_data = []
 
-        if results.masks is not None:  # Falls YOLO nichts gefunden hat, kann das None sein
-            mask_polygons = results.masks.xy  # list of arrays
-            class_ids = results.boxes.cls.tolist()  # z.B. [0, 1, 0, ...]
-            confs = results.boxes.conf.tolist()     # z.B. [0.95, 0.87, ...]
+        if results.masks is not None:
+            # list of arrays of polygons with shape (N, 2)
+            mask_polygons = results.masks.xy
+            # per polygon class id and confidence so each (N, 1)
+            class_ids = results.boxes.cls.tolist()
+            confs = results.boxes.conf.tolist()
 
             for i, polygon_array in enumerate(mask_polygons):
-                # polygon_array ist ein Nx2 NumPy-Array
                 polygon_list = polygon_array.tolist()
 
-                # Klassendaten
                 cls_id = int(class_ids[i])
                 conf = float(confs[i])
                 label = results.names[cls_id] if cls_id in results.names else f"class_{cls_id}"
 
                 polygons_data.append({
                     "label": label,
-                    "polygon": polygon_list,    # Liste von [x, y]
+                    "polygon": polygon_list,
                     "meta": {"confidence": conf}
                 })
 
-        # 4. In den In-Memory Cache schreiben
+        # 4. save results to session cache
         SEGMENTATION_CACHE[session_id].append({
             "page_image": image_filename,
             "polygons": polygons_data,
             "original_size": [page_img.width, page_img.height]
         })
 
-    # 5. session_id zurückgeben
+    # 5. return session_id to upload page t
     return {"session_id": session_id, "message": "PDF verarbeitet"}
 
-# -------------------------------------------------------------------
-# GET /preview: Vorschau-Seite (preview.html) mit "Blätterfunktion"
-# -------------------------------------------------------------------
+@app.post("/api/process_deal")
+async def process_deal(request: Request):
+    """
+    Processes the deal extraction by:
+    1. Cropping the deal area using the polygon mask from the page image.
+    2. Using process_image to extract structured information.
+    Expect JSON:
+    {
+        "session_id": "...",
+        "page_index": 0,
+        "polygon_index": 0
+    }
+    """
+    data = await request.json()
+    session_id = data.get("session_id")
+    page_index = data.get("page_index")
+    polygon_index = data.get("polygon_index")
+
+    if session_id not in SEGMENTATION_CACHE:
+        return JSONResponse({"error": "Session not found"}, status_code=404)
+
+    pages = SEGMENTATION_CACHE[session_id]
+    try:
+        page_data = pages[page_index]
+    except IndexError:
+        return JSONResponse({"error": "Invalid page index"}, status_code=400)
+
+    polygons = page_data.get("polygons", [])
+    try:
+        poly_data = polygons[polygon_index]
+    except IndexError:
+        return JSONResponse({"error": "Invalid polygon index"}, status_code=400)
+
+    # Load the page image from the tmp directory
+    image_filename = page_data.get("page_image")
+    image_path = os.path.join("tmp", image_filename)
+    if not os.path.exists(image_path):
+        return JSONResponse({"error": "Page image not found"}, status_code=404)
+
+    try:
+        image = Image.open(image_path).convert("RGBA")
+    except Exception as e:
+        return JSONResponse({"error": "Could not open image"}, status_code=500)
+
+    # Get the polygon points
+    polygon = poly_data.get("polygon", [])
+    if not polygon:
+        return JSONResponse({"error": "Polygon data missing"}, status_code=400)
+
+    # Compute bounding box from polygon points
+    xs = [point[0] for point in polygon]
+    ys = [point[1] for point in polygon]
+    min_x, min_y = int(min(xs)), int(min(ys))
+    max_x, max_y = int(max(xs)), int(max(ys))
+
+    # Crop the image to the bounding box region
+    cropped = image.crop((min_x, min_y, max_x, max_y))
+
+    # Create a mask image for the polygon (relative to the cropped region)
+    width, height = cropped.size
+    mask = Image.new("L", (width, height), 0)
+    polygon_relative = [(x - min_x, y - min_y) for (x, y) in polygon]
+    ImageDraw.Draw(mask).polygon(polygon_relative, fill=255)
+
+    # Apply the mask to the cropped image
+    result = Image.new("RGBA", cropped.size)
+    result.paste(cropped, (0, 0), mask)
+
+    # Save the resulting cropped image with polygon mask
+    crop_filename = f"{session_id}_page_{page_index}_deal_{polygon_index}.png"
+    crop_path = os.path.join("tmp", crop_filename)
+    result.save(crop_path, "PNG")
+
+    # Use process_image to extract structured deal info from the cropped image
+    # deal_info = process_image(crop_path, model="llama3.2-vision")
+    # deal_info = process_image(crop_path, model="llama3.2-vision:11b-instruct-q8_0")
+    deal_info = process_image(crop_path, model="minicpm-v")
+    extracted_info = f"""
+    Brand: {deal_info.get("brand", "unknown")}<br>
+    Product Name: {deal_info.get("productname", "unknown")}<br>
+    Original Price: {deal_info.get("original_price", "unknown")}<br>
+    Deal Price: {deal_info.get("deal_price", "unknown")}<br>
+    Amount: {deal_info.get("weight", "unknown")}<br>
+    """.strip()
+
+    return JSONResponse({
+        "crop_image": crop_filename,
+        "extracted_info": extracted_info
+    })
+
 @app.get("/preview", response_class=HTMLResponse)
 def preview_page(request: Request, session_id: str):
-    """
-    Zeigt eine Vorschau-Seite (Canvas), wo Polygone angezeigt werden
-    """
     if session_id not in SEGMENTATION_CACHE:
         return HTMLResponse(content="Session not found", status_code=404)
     return templates.TemplateResponse("preview.html", {
@@ -268,24 +304,14 @@ def preview_page(request: Request, session_id: str):
         "session_id": session_id
     })
 
-# -------------------------------------------------------------------
-# GET /api/preview_data: Liefert die Segmentierungsdaten aus dem Cache
-# -------------------------------------------------------------------
 @app.get("/api/preview_data")
 def get_preview_data(session_id: str):
-    """
-    Liefert die (page_image, polygons) für die Preview-Ansicht
-    """
     if session_id not in SEGMENTATION_CACHE:
         return JSONResponse({"error": "Session not found"}, status_code=404)
     return {"pages": SEGMENTATION_CACHE[session_id]}
 
-# -------------------------------------
-# Zum direkten Ausliefern der Bilder im tmp/ Ordner
-# -------------------------------------
 app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
-# clear tmp folder
 def clear_tmp_folder():
     for root, dirs, files in os.walk("tmp"):
         for file in files:
