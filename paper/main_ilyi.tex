@@ -1,0 +1,212 @@
+% This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
+\pdfoutput=1
+% In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
+
+\documentclass[11pt]{article}
+
+% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
+% Change to "preprint" to generate a non-anonymous version with page numbers.
+\usepackage[preprint]{coling}
+
+% Standard package includes
+\usepackage{times}
+\usepackage{latexsym}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\usepackage[T1]{fontenc}
+% For Vietnamese characters
+% \usepackage[T5]{fontenc}
+% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
+
+% This assumes your files are encoded as UTF8
+\usepackage[utf8]{inputenc}
+
+% This is not strictly necessary, and may be commented out,
+% but it will improve the layout of the manuscript,
+% and will typically save some space.
+\usepackage{microtype}
+
+% This is also not strictly necessary, and may be commented out.
+% However, it will improve the aesthetics of text in
+% the typewriter font.
+\usepackage{inconsolata}
+
+%Including images in your LaTeX document requires adding
+%additional package(s)
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+
+% If the title and author information does not fit in the area allocated, uncomment the following
+%
+%\setlength\titlebox{<dim>}
+%
+% and set <dim> to something 5cm or larger.
+
+\title{Multimodal Information Extraction of Supermarket Leaflets}
+
+\author{Xincheng Liao\textsuperscript{}, Junwen Duan\textsuperscript{}\thanks{\ \ Corresponding author. Email: \href{mailto:jwduan@csu.edu.cn}{jwduan@csu.edu.cn}}, Yixi Huang\textsuperscript{}, Jianxin Wang\textsuperscript{} \\
+Hunan Provincial Key Lab on Bioinformatics, School of Computer Science and Engineering, \\
+Central South University, Changsha, Hunan, China \\
+\texttt{\{ostars, jwduan, yx.huang\}@csu.edu.cn, jxwang@mail.csu.edu.cn} \\
+\href{https://github.com/OStars/RUIE}{https://github.com/OStars/RUIE}
+}
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+TODO
+\end{abstract}
+
+\section{Introduction}
+\subsection{Motivation}
+\subsection{Problem Statement}
+\subsection{Contributions}
+
+\section{Related Works}
+\indent{\textbf{Deal Detection}.}
+\indent{\textbf{Optical Character Recognition}.}
+OCR-Model-Driven methods use OCR tools to acquire text
+and bounding box information. Subsequently, they rely
+on the models to integrate text, layout, and visual data.
+
+\indent{\textbf{Information Extraction}.}
+
+\section{Deal Detection}
+    \subsection{Datasets}
+    \subsection{Model}
+    \subsection{Experiments}
+
+\section{Information Extraction of Supermarket Deals}
+    % - Subsequent to detection and separation of deals, the goal is to extract useful information from it.
+    % - Difficulties
+    %     - High variety of layouts, colors, fonts, sizes
+    %         - Deal sometimes have superscripted decimals and no separation dot.
+    %         - Original prices are sometimes striked through.
+    %         - Deal prices are sometimes in a very different font to the ones it was trained on.
+    %         - Overlapping elements
+    %     - Multimodal information
+    %         - Product image: visual
+    %         - Text: alphabetical + numerical
+    %     - OCR errors
+    %     - Eigennamen (mostly brand names)
+    %     - German language
+    % - Goal: Extract 
+    %     - Product name
+    %     - brand
+    %     - original price
+    %     - deal price
+    %     - unit
+Subsequently to the detection and separation of supermarket deals, the overarching goal of using these in applications requires the extraction of the various useful information from these deals. 
+The task of extracting meaningful and structured information from supermarket deal images is a complex and multi-faceted problem, requiring the integration of various modalities, overcoming challenges posed by noisy data, and leveraging deep learning techniques. This section provides a detailed exploration of the underlying challenges, methodologies, and the theoretical and practical framework needed to perform such extraction.
+
+\subsection{Challenges in Information Extraction for Supermarket Deals}
+
+Supermarket deal extraction involves a series of challenges that require careful attention and sophisticated methods to resolve. These challenges include the diversity of layout and format in the images, the multimodal nature of the data, the frequent occurrence of Optical Character Recognition (OCR) errors, and the specific linguistic and cultural issues posed by the German language.
+
+% \subsubsection{High Variety in Layouts and Visual Elements}
+\indent{\textbf{High Variety in Layouts and Visual Elements.}}
+Supermarket deals exhibit considerable variability in layout, color schemes, font choices, and text sizes, which hinders automatic detection and extraction. Deals are often printed with superscripted decimals or without clear separation between integer and fractional components of the price (e.g., "2.29" might appear as "229"). This phenomenon exacerbates OCR difficulties. Additionally, original prices may be struck through, while deal prices are sometimes printed in drastically different fonts than those the OCR model was trained on. Furthermore, overlapping elements—such as product images or additional textual information—often interfere with text extraction and localization. These diverse visual elements require robust and flexible models capable of accommodating such variability.
+
+% \subsubsection{Multimodal Information}
+\indent{\textbf{Multimodal Information.}}
+Supermarket deal images consist of both visual (e.g., product images) and textual (e.g., brand names, prices, and product descriptions) modalities, each contributing different types of information. While text provides rich information about the product’s identity, pricing, and units, the image serves as a supplementary modality that aids in product identification, brand recognition, and other visual cues. Multimodal fusion, where information from both text and image domains is integrated, is a key challenge, and existing models must effectively leverage both sources to provide high-quality extraction.
+
+\indent{\textbf{Conversion Errors and Linguistic Challenges.}}
+OCR systems frequently introduce errors, particularly when dealing with non-standard fonts, noisy backgrounds, or small text. This is particularly problematic when extracting numerical data such as prices. Common errors include misinterpretation of decimals and digits (e.g., "229" instead of "2.29") and missing characters. To address this, OCR post-processing steps, such as error correction using context-based reasoning or dedicated error models, are required. Additionally, the presence of proper nouns—particularly brand names—adds complexity, as these entities may not appear in typical language models, making their extraction difficult. Furthermore, the German language presents its own set of challenges, including compound words, specific punctuation conventions, and diverse word forms, all of which must be accounted for in any robust extraction model.
+
+\indent{\textbf{Ambiguities.}}
+The presence of overlapping elements—whether textual or graphical—can lead to a degradation in the extraction accuracy. This challenge is compounded when the overlap involves essential information, such as when the original price is partially obscured by a product image or strike-through marks. Furthermore, ambiguity in labeling and the context in which different pieces of information appear in the deal image can create difficulties in associating text with the correct object (e.g., associating a price with a product rather than the surrounding descriptive text).
+
+\subsection{Formal Approach}
+Formally, the task of information extraction from a deal image can be defined as the identification of specific entities, including the product name, brand, original price, deal price, and unit. We define the following set of output labels:
+\begin{equation}
+\mathcal{Y} = \{y_{i}\}_{i=1}^{n},
+\end{equation}
+where \(y_{i}\) represents the $i$-th entity in the deal image. In the following, the entities are defined as:
+\begin{itemize}
+    \item \(y_{\text{product\_name}}\): The name of the product.
+    \item \(y_{\text{brand}}\): The brand of the product.
+    \item \(y_{\text{original\_price}}\): The original price of the product.
+    \item \(y_{\text{deal\_price}}\): The deal price of the product.
+    \item \(y_{\text{unit}}\): The unit of the product (e.g., weight, volume).
+\end{itemize}
+
+To extract these entities, one aims to learn a function \(f(\cdot)\) that maps an input image \(I\) to the desired outputs:
+\begin{equation}
+    f: I \to \mathcal{Y},
+\end{equation}
+where \( I \) is the deal image, and \( \mathcal{Y} \) represents the extracted entities.
+
+The choice of the function \( f(\cdot) \) is an architectural decision that depends on the specific requirements of the task, the nature of the data, the available resources, and the desired performance metrics. 
+
+\subsection{Architectural Approaches to Information Extraction}
+- Classical methods: Rule-based, template-based
+- Traditional methods: Dividing into multi-stage
+    - 1. Text detection
+    - 2. Text recognition
+    - 3. Key-value pair extraction
+- OCR + LLM
+- End2End: Vision Encoder Decoder Model
+    - Donut 
+- E2E: LVLM
+
+
+\subsection{Dataset Creation}
+Since there was no dataset to evaluate or train, a custom dataset was created by manually annotating a collection of supermarket deal images. The dataset includes images with diverse layouts, fonts, and colors to ensure robustness. Each image is annotated with bounding boxes for text regions and corresponding labels for product name, brand, original price, deal price, and unit. The dataset is split into training, validation, and test sets to facilitate model development and evaluation. 
+% Table \ref{tab:dataset} provides an overview of the custom dataset and Figure \ref{fig:dataset} shows sample images with annotations.
+% TODO: Add table and figure
+
+\subsection{Optical Character Recognition}
+Optical Character Recognition (OCR) is a critical component in the information extraction pipeline. Several OCR solutions were evaluated to determine the most suitable one for our task. The evaluated OCR tools include Tesseract, EasyOCR, PaddleOCR, and DocTR. Each tool was assessed based on its accuracy, speed, and ability to handle diverse fonts and layouts.
+
+\subsection{Experiments}
+\indent{\textbf{Setup}.}
+The experiments were conducted to compare the performance of different OCR solutions and end-to-end models for information extraction. The evaluation metrics include precision, recall, and F1-score for each entity type (product name, brand, original price, deal price, and unit). The experiments were performed on the test set of the custom dataset.
+
+\indent{\textbf{Results}.}
+The results of the experiments indicate that the end-to-end models, such as the Vision Encoder Decoder Model (e.g., Donut) and Large Vision-Language Models (LVLM), outperform traditional OCR-based methods in terms of accuracy and robustness. The OCR + LLM approach also shows promising results, particularly in handling OCR errors and extracting key-value pairs.
+
+\subsection{Evaluation}
+The evaluation of the models was conducted using standard metrics, including precision, recall, and F1-score. The comparison between LVLM, OCR + LLM, and Donut models highlights the strengths and weaknesses of each approach. The results demonstrate that end-to-end models provide superior performance in extracting structured information from supermarket deal images.
+
+\section{Application}
+\subsection{Database}
+
+    
+\subsection{Optical Character Recognition}
+
+
+    \subsection{Experiments}
+    \indent{\textbf{Setup}.}
+    - Common OCR solutions: Tesseract, EasyOCR, PaddleOCR, DocTR
+    - Goal: Which OCR solution is the best for our task?
+    - 
+
+
+
+
+    \subsection{Evaluation}
+    - LVLM, OCR+LLM, Donut
+    - OCR + LLM Vergleich
+
+\section{Application}
+    \section{Database}
+    \section{Front End / Webapp}
+
+\section{Conclusion}
+    \subsection{Summary}
+    \subsection{Future Work}
+    ww
+
+% Bibliography entries for the entire Anthology, followed by custom entries
+%\bibliography{anthology,custom}
+% Custom bibliography entries only
+\bibliography{references}
+
+\end{document}

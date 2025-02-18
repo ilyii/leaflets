@@ -12,7 +12,9 @@ import uuid
 from tqdm import tqdm
 
 from ultralytics import YOLO
-from pdf2image import convert_from_path
+# from pdf2image import convert_from_path
+import fitz
+
 from PIL import Image, ImageDraw  # Ensure ImageDraw is imported
 from deal_processing import process_image  # import process_image from deal_processing.py
 
@@ -150,7 +152,21 @@ async def upload_pdf(file: UploadFile = File(...)):
         f.write(pdf_contents)
 
     # 2. convert pdf to images
-    pages = convert_from_path(pdf_path)
+    # Pdf2image
+    # pages = convert_from_path(pdf_path)
+
+    # PyMuPDF
+    # zoom_x = 2.0  # horizontal zoom
+    # zoom_y = 2.0  # vertical zoom
+    # mat = pymupdf.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
+    # pix = page.get_pixmap(matrix=mat)  # use 'mat' instead of the identity matrix
+    pages = []
+    doc = fitz.open(pdf_path)
+    for i in range(doc.page_count):
+        page = doc.load_page(i)
+        pix = page.get_pixmap()
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        pages.append(img)
     # new unique session_id for this pdf
     session_id = str(uuid.uuid4())
     SEGMENTATION_CACHE[session_id] = []
@@ -280,7 +296,8 @@ async def process_deal(request: Request):
     # Use process_image to extract structured deal info from the cropped image
     # deal_info = process_image(crop_path, model="llama3.2-vision")
     # deal_info = process_image(crop_path, model="llama3.2-vision:11b-instruct-q8_0")
-    deal_info = process_image(crop_path, model="minicpm-v")
+    # deal_info = process_image(crop_path, model="minicpm-v")
+    deal_info = {}
     extracted_info = f"""
     Brand: {deal_info.get("brand", "unknown")}<br>
     Product Name: {deal_info.get("productname", "unknown")}<br>
@@ -310,6 +327,8 @@ def get_preview_data(session_id: str):
         return JSONResponse({"error": "Session not found"}, status_code=404)
     return {"pages": SEGMENTATION_CACHE[session_id]}
 
+# if not os.path.exists("tmp"):
+#     os.makedirs("tmp")
 app.mount("/tmp", StaticFiles(directory="tmp"), name="tmp")
 
 def clear_tmp_folder():
