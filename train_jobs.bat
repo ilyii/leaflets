@@ -11,3 +11,10 @@
 @REM uv run src/yolo/train.py --config src/yolo/configs/yolov8m_da/yolo8m_4.yaml
 @REM uv run src/yolo/train.py --config src/yolo/configs/yolov8m_da/yolo8m_5.yaml
 @REM uv run src/yolo/train.py --config src/yolo/configs/yolov8m_da/yolo8m_6.yaml
+@REM
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_1.yaml
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_2.yaml
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_3.yaml
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_4.yaml
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_5.yaml
+uv run src/yolo/train.py --config src/yolo/configs/yolov8s_da/yolo8s_6.yaml
