@@ -1,7 +1,6 @@
-model_path: "yolo11m.pt"
-task: "seg"
+model_path: "yolov8m-seg.pt"
 data_path: "data/data-seg.yaml"
-epochs: 30
+epochs: 20
 batch: 16
 imgsz: 640
 cache: true
