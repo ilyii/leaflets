@@ -1,5 +1,4 @@
-model_path: "yolo11m.pt"
-task: "seg"
+model_path: "yolov8s-seg.pt"
 data_path: "data/data-seg.yaml"
 epochs: 30
 batch: 16
