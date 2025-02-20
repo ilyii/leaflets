@@ -28,7 +28,7 @@
 \ExecuteOptions{hyperref} % default is to use hyperref
 \ProcessOptions\relax
 
-\typeout{Conference Style for COLING 2025}
+\typeout{Custom Lib.sty}
 
 \usepackage{xcolor}
 
@@ -192,7 +192,7 @@
 \newcommand\newcite{\citet} % to get "Author (Year)" with natbib
 \newcommand{\citeposs}[1]{\citeauthor{#1}'s (\citeyear{#1})} % to get "Author's (Year)"
 
-\bibliographystyle{coling_natbib}
+\bibliographystyle{bibstyle}
 
 % Bibliography
 
@@ -310,3 +310,12 @@
   \def\href#1#2{{#2}}
   \usepackage{url}
 \fi
+
+% CUSTOM
+\def\code#1{\texttt{#1}}
+
+% Better referencing
+\def\eqref#1{\href{#1}{Equation~\ref{#1}}}
+\def\tabref#1{\href{#1}{Table~\ref{#1}}}
+\def\figref#1{\href{#1}{Figure~\ref{#1}}}
+\def\secref#1{\href{#1}{Section~\ref{#1}}}

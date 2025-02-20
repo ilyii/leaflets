@@ -507,13 +507,15 @@ def main(level=1,
     for model_name in LLM_MODELS:
         model_out_name = model_name.replace(":","_")
         outpath = f"llm_results_{model_out_name}.pkl"
-        if not os.path.exists(os.path.join(RESULTS_DIR, outpath)):
+        # outpath = os.path.join(RESULTS_DIR, f"llm_results_{model_out_name}.pkl")
+        if not os.path.exists(outpath):
             print(f"Prompting LLM {model_out_name}...")
             llm_responses = llm_prompting(ocr_results_df, LLM_ENGINE, model_name)            
             pickle.dump(llm_responses, open(f"llm_results_{model_out_name}.pkl", "wb"))
         else:
             print(f"Results for LLM {model_out_name} already exist. Loading...")
-            llm_responses = pickle.load(open(os.path.join(RESULTS_DIR, outpath), "rb"))
+            llm_responses = pickle.load(open(outpath, "rb"))
+
         llm_responses_list.append(llm_responses)
 
 
@@ -577,7 +579,6 @@ def main(level=1,
     avg_levdistances_per_llm = defaultdict(lambda: defaultdict(list))
     for ocrmodel, accuracies in accuracies_dict.items():
         for llmmodel, entity_acc in accuracies.items():
-            print(entity_acc, llmmodel)
             avg_accuracies_per_llm[ocrmodel][llmmodel] = np.mean([np.mean(acc) for acc in entity_acc.values()])
 
     for ocrmodel, levdistances in levdistances_dict.items():
@@ -649,7 +650,7 @@ def main(level=1,
         plt.tight_layout()
         plt.savefig(f"{outname}.png", dpi=400, bbox_inches="tight")
 
-    
+    print("Visualizing...")
     visualize_avg_accuracies(avg_accuracies_per_llm, outname=f"./plots/avg_accuracies")
     visualize_avg_levdistances(avg_levdistances_per_llm, outname=f"./plots/avg_levdistances")
     
@@ -663,7 +664,7 @@ if __name__ == "__main__":
     args = {
         "PROJECT_DIR": PROJECT_DIR,
         "RESULTS_DIR": RESULTS_DIR,
-        "LABELS_PATH": os.path.join(RESULTS_DIR, "val_deals.csv"),
+        "LABELS_PATH": os.path.join(RESULTS_DIR, "labeled_deals_all_imgpath.csv"),
 
         # "LLM_RESULTS_PATH": os.path.join(RESULTS_DIR,"llm_results_17_02.pkl"),
         "OCR_RESULTS_PATH": os.path.join(RESULTS_DIR,"ocr_results_plain.csv"),

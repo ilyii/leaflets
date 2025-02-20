@@ -1,3 +1,5 @@
+% !TEX root = main_ilyi.tex
+
 % This must be in the first 5 lines to tell arXiv to use pdfLaTeX, which is strongly recommended.
 \pdfoutput=1
 % In particular, the hyperref package requires pdfLaTeX in order to break URLs across lines.
@@ -6,7 +8,7 @@
 
 % Change "review" to "final" to generate the final (sometimes called camera-ready) version.
 % Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage[preprint]{coling}
+\usepackage[preprint]{lib}
 
 % Standard package includes
 \usepackage{times}
@@ -64,9 +66,39 @@ TODO
 \end{abstract}
 
 \section{Introduction}
+
+Automated information extraction from supermarket leaflets poses significant challenges due to the unstructured nature of promotional content, diverse layouts, and varying text-image relationships. The ability to accurately extract product names, prices, and discount details is critical for applications such as competitive analysis, dynamic pricing strategies, and digital retail transformation. Traditional OCR-based approaches often struggle with these complexities, as they are not well-suited for handling visually complex layouts that integrate both textual and graphical elements. Consequently, there is a growing need for advanced methodologies that leverage deep learning and multimodal techniques to improve extraction accuracy and robustness.
+
 \subsection{Motivation}
+
+Retailers distribute promotional leaflets regularly, providing crucial information about product pricing, discounts, and special offers. Extracting structured data from these leaflets is essential for a variety of downstream applications, including price monitoring, personalized marketing, and retail analytics. However, the nature of these documents presents several challenges. Leaflets often feature intricate layouts that combine product images with multiple text regions, making it difficult to separate relevant information from decorative or promotional elements. Furthermore, text appears in different font styles, orientations, and colors, increasing the difficulty of standard OCR-based extraction. The presence of multilingual content and retail-specific terminologies further complicates the process, as many OCR systems struggle to recognize domain-specific jargon or currency symbols correctly. Additionally, supermarket leaflets often contain noisy backgrounds, overlapping elements, and handwritten annotations, all of which contribute to OCR errors. Given these challenges, traditional rule-based and template-based methods fall short of delivering reliable results. Recent advancements in deep learning, particularly in vision-language models, provide a more adaptable and powerful approach to structured information extraction. Large Vision-Language Models (LVLMs) and end-to-end document understanding architectures such as Donut have demonstrated significant potential in tackling these challenges by integrating contextual understanding with visual processing.
+
 \subsection{Problem Statement}
+
+The core problem addressed in this work is the extraction of structured product and pricing information from supermarket leaflets. Given an image $I$ containing both textual and visual information, the objective is to extract a structured representation $\mathcal{D}$ that encapsulates relevant entities. More formally, this representation can be defined as:
+\begin{equation}
+    \mathcal{D} = \{ (p_i, v_i, c_i) \}_{i=1}^{N},
+\end{equation}
+where $p_i$ represents a product name, $v_i$ denotes its corresponding price, and $c_i$ categorizes the type of promotional offer, such as a direct discount or a multi-buy deal. Several challenges make this task particularly difficult. First, segmenting and localizing relevant text and graphical regions in a cluttered layout is non-trivial, as different sections of the leaflet may contain multiple, overlapping elements. Additionally, associating product names with the correct prices requires context-aware processing, particularly when multiple prices exist for a single product due to variations such as original price, discounted price, and special membership discounts. Finally, OCR errors, layout inconsistencies, and missing textual fields introduce additional obstacles, necessitating robust extraction techniques that can generalize across different leaflet designs and promotional structures.
+
+% \subsection{Contributions}
+
+% This work presents a systematic investigation into various information extraction approaches, evaluating both traditional OCR pipelines and state-of-the-art deep learning methods. A comparative analysis is conducted between OCR-based systems, OCR-LLM hybrid models, and end-to-end vision-language architectures to assess their effectiveness in extracting structured information from supermarket leaflets. To enhance the reliability of extracted text, a normalization pipeline is introduced to correct common OCR errors and standardize output representations. Additionally, benchmark evaluations are performed on supermarket leaflet datasets, using models such as Donut and LVLMs to analyze their performance in structured data extraction. Beyond the technical contributions, this work also provides an open-source implementation and dataset annotations to facilitate further research in retail document analysis. By bridging the gap between conventional OCR techniques and modern deep learning approaches, this study aims to advance the field of automated leaflet analysis and contribute to more accurate and efficient retail information extraction.
+
+
+
 \subsection{Contributions}
+
+This work makes the following key contributions:
+\begin{itemize}
+    \item We conduct a systematic evaluation of various information extraction approaches, including traditional OCR pipelines, OCR-LLM hybrid models, and end-to-end deep learning frameworks.
+    \item We introduce a normalization pipeline to improve OCR output consistency, mitigating common recognition errors in promotional leaflets.
+    \item We benchmark state-of-the-art document understanding models such as Donut and LVLMs on supermarket leaflet datasets, analyzing their effectiveness in structured information extraction.
+    \item We provide an open-source implementation and dataset annotations to facilitate future research in retail document analysis.
+\end{itemize}
+These contributions aim to bridge the gap between traditional OCR-based methods and modern deep learning approaches, advancing the field of automated leaflet analysis.
+
+
 
 \section{Related Works}
 \indent{\textbf{Deal Detection}.}
@@ -76,6 +108,43 @@ and bounding box information. Subsequently, they rely
 on the models to integrate text, layout, and visual data.
 
 \indent{\textbf{Information Extraction}.}
+
+
+\section{Nature of Supermarket Leaflet Data}
+Supermarket leaflets constitute a complex and heterogeneous data source, characterized by multimodal content with varying levels of structured and unstructured information. This data presents unique challenges in computational processing due to its inherent ambiguities, multi-instance object representation, and spatial dependencies. The reader is encouraged to simulanously inspect the visual representation of the specific data-related challenges in \figref{fig:leaflet_data} while reading ahead.
+
+Formally, let $I \in \mathbb{R}^{H \times W \times C}$ denote a supermarket leaflet image, where $H$ and $W$ represent height and width, and $C$ indicates the number of channels. The primary goal in leaflet analysis is to extract a structured representation $\mathcal{D} = \{(c_i, p_i, d_i, m_i)\}_{i=1}^{N}$, where each tuple represents category $c_i$, price $p_i$, product description $d_i$, and brand marker $m_i$ for $N$ detected items.
+
+The ambiguity in leaflet data stems from multiple contributing factors. First, price recognition is hindered by the existence of multiple price points associated with a single product. Given product $P_j$, we define a set of associated prices $P_j = \{ p_{j,1}, p_{j,2}, ..., p_{j,K} \}$, where $K$ denotes the number of distinct price entries, including original prices, discounts, membership-based reductions, and additional incentives (e.g., coupon-based deductions). The decision function for selecting the correct price entry can be formulated as:
+\begin{equation}
+    p^*_j = \arg\max_{p \in P_j} \Phi(p, C),
+\end{equation}
+where $\Phi(p, C)$ represents a learned scoring function incorporating context $C$, including proximity to textual cues and visual emphasis features.
+
+Furthermore, the representation of products in supermarket leaflets does not conform to a strict one-to-one mapping between textual and visual elements. Some product deals encapsulate multiple distinct items, leading to a one-to-many mapping between product images and extracted textual features. Let $X = \{x_i\}_{i=1}^{M}$ represent a set of detected product images and $T = \{t_j\}_{j=1}^{N}$ a set of textual entities; the optimal pairing function $\mathcal{M}: X \to 2^T$ requires the resolution of occlusions, segmentation artifacts, and inconsistent typographic hierarchies.
+
+In the context of visual information extraction, a major challenge arises from the misinterpretation of numerical values due to errors in punctuation extraction. Specifically, the process is prone to systematic errors in decimal place recognition due to font-specific artifacts and noisy backgrounds. Let $s_t$ denote the OCR-extracted string, where $s_t \sim P(S)$ represents the probability distribution over possible transcriptions. A corrective decoding function $\Gamma(s_t)$ can be optimized via:
+\begin{equation}
+    \Gamma(s_t) = \arg\max_{s \in \mathcal{S}} P(s | s_t, \mathcal{C}),
+\end{equation}
+where $\mathcal{S}$ is the space of plausible price values, and $\mathcal{C}$ integrates surrounding contextual information.
+
+
+Finally, spatial dependencies play a critical role in entity association. Traditional object detection methods relying purely on bounding box regression, such as Faster R-CNN \cite{ren2015faster}, may be insufficient due to the lack of explicit spatial reasoning mechanisms. Therefore, the incorporation of spatial modeling is essential to ensure accurate entity association and disambiguation.
+
+%Figure Placeholder
+\begin{figure}[ht]
+    \centering
+    \fbox{\parbox[c][3cm][c]{5cm}{\centering Figure Placeholder: Leaflet Data Challenges}}
+    \caption{Visual representation of the challenges in supermarket leaflet data.}
+    \label{fig:leaflet_data}
+\end{figure}
+
+% Alternative formulations leveraging graph-based modeling, where detected entities form nodes in a graph $G = (V, E)$, have demonstrated improved robustness. Edges $E$ encode spatial adjacency relationships, and an optimal matching function can be obtained via:
+% \begin{equation}
+%     \mathcal{A}^* = \arg\max_{\mathcal{A} \subseteq E} \sum_{(i,j) \in \mathcal{A}} \Psi(v_i, v_j),
+% \end{equation}
+% where $\Psi(v_i, v_j)$ measures the semantic compatibility of entity pair $(i,j)$. The inference of $\mathcal{A}^*$ can be approached using graph neural networks (GNNs) \cite{scarselli2008graph} or optimization techniques such as maximum weight matching.
 
 \section{Deal Detection}
     \subsection{Datasets}
@@ -130,11 +199,11 @@ Formally, the task of information extraction from a deal image can be defined as
 \end{equation}
 where \(y_{i}\) represents the $i$-th entity in the deal image. In the following, the entities are defined as:
 \begin{itemize}
-    \item \(y_{\text{product\_name}}\): The name of the product.
-    \item \(y_{\text{brand}}\): The brand of the product.
-    \item \(y_{\text{original\_price}}\): The original price of the product.
-    \item \(y_{\text{deal\_price}}\): The deal price of the product.
-    \item \(y_{\text{unit}}\): The unit of the product (e.g., weight, volume).
+    \item \code{\(y_{\text{product\_name}}\)}: The name of the product.
+    \item \code{\(y_{\text{brand}}\)}: The brand of the product.
+    \item \code{\(y_{\text{original\_price}}\)}: The original price of the product.
+    \item \code{\(y_{\text{deal\_price}}\)}: The deal price of the product.
+    \item \code{\(y_{\text{unit}}\)}: The unit of the product (e.g., weight, volume).
 \end{itemize}
 
 To extract these entities, one aims to learn a function \(f(\cdot)\) that maps an input image \(I\) to the desired outputs:
@@ -146,47 +215,297 @@ where \( I \) is the deal image, and \( \mathcal{Y} \) represents the extracted 
 The choice of the function \( f(\cdot) \) is an architectural decision that depends on the specific requirements of the task, the nature of the data, the available resources, and the desired performance metrics. 
 
 \subsection{Architectural Approaches to Information Extraction}
-- Classical methods: Rule-based, template-based
-- Traditional methods: Dividing into multi-stage
-    - 1. Text detection
-    - 2. Text recognition
-    - 3. Key-value pair extraction
-- OCR + LLM
-- End2End: Vision Encoder Decoder Model
-    - Donut 
-- E2E: LVLM
+Among the various existing architectural approaches to information extraction, several methodologies have been developed to address the inherent complexities in supermarket deal images. These methods can be categorized into classical approaches, multi-stage traditional models, hybrid OCR-LLM systems, and end-to-end deep learning frameworks. Each paradigm offers distinct advantages, and their applicability depends on computational resources, dataset characteristics, and performance requirements.
+
+\subsection{Traditional Multi-Stage Methods}
+Traditional architectures decompose the problem into sequential sub-tasks and solve these independently through sub-task-specific systems. While these methods have been studied extensively  %ADD REF
+and with high variability in methodology, they are often divided into three main stages: text detection, text recognition, and key-value pair extraction.
+
+\indent{\textbf{Text Detection.}} Text detection is the process of identifying regions in the image that contain textual information. Commonly used methods include rule-based systems, as well as mostly small object detection neural networks to detect regions of textural interest by predicting $M$ bounding boxes $\{b_i\}_{i=1}^{M}$.
+
+\indent{\textbf{Text Recognition.}} Each bounding box $b_i$ is used to extract the corresponding region in the image, which is passed to a text recognition model to convert the visual representation into a textual one. Since this task is often more complex than it might appear due to decoding errors, there exists a high variety of models that can be used for this task, such as CRNN \cite{shi2016crnn} or transformer-based recognizers.
+Given a set of $M$ bounding boxes $\{b_i\}_{i=1}^{M}$, the goal is to predict the corresponding textual entities $\{t_i\}_{i=1}^{M}$.
+\begin{equation}
+    \{t_i\}_{i=1}^{M} = \arg\max_{\{t_i\}_{i=1}^{M}} P(\{t_i\}_{i=1}^{M} | \{b_i\}_{i=1}^{M}).
+\end{equation}
+
+Text detection and recognition, together with pre-and post-processing steps, is often referred to and standardized as Optical Character Recognition (OCR).
+
+\textbf{Key-Value Pair Extraction:} Finally, extracted text is structured into meaningful entities. Named Entity Recognition (NER) models or Graph Neural Networks (GNNs) can be used to learn associations between extracted elements:
+\begin{equation}
+    \mathcal{A}^* = \arg\max_{\mathcal{A} \subseteq E} \sum_{(i,j) \in \mathcal{A}} \Psi(v_i, v_j),
+\end{equation}
+where $E$ represents textual adjacency relationships.
+
+While these types of appraoches are widely used, they inherit a high complexity due to the need for multiple models with each being trained, evaluated, tested and managed independently, which also leads to a higher computational overhead due to input-output transformations between the stages. Furthermore, the lack of end-to-end training can lead to suboptimal performance and error propagation, which is often seen when applying these types of models to edge cases or unseen data.
+
+\subsection{Hybrid OCR-LLM Models}
+The rise of large language models (LLMs) has led to the development of hybrid OCR-LLM models that combine the strengths of OCR tools with the linguistic capabilities of LLMs. While these appraoches still rely on a more traditional process to convert visually appearing text into a machine-readable form, the LLM is used to enhance the robustness of the OCR output by providing contextual reasoning capabilities.
+
+\begin{equation}
+    \hat{y} = F_\theta (T),
+\end{equation}
+where $T$ is the OCR output and $F_\theta$ is a pretrained, general-purpose LLM that is being prompted with a specific task. 
+%TODO: Add more information about the architecture as well as problems
+
+\subsection{End-to-End Models}
+The 
+
+End-to-End (E2E) approaches eliminate pipeline fragmentation by learning a unified mapping $F: I \to \mathcal{D}$. Two major architectures dominate this space:
+
+\textbf{Vision Encoder-Decoder Models:} Models such as Donut \cite{kim2022donut} encode input images via a Vision Transformer (ViT) and generate structured outputs via an autoregressive decoder:
+\begin{equation}
+    P(Y | I) = \prod_{t=1}^{T} P(y_t | I, y_{<t}).
+\end{equation}
+These methods improve robustness by directly training on image-text pairs without explicit OCR supervision.
+
+\textbf{Large Vision-Language Models (LVLMs):} Multimodal transformers such as BLIP \cite{li2022blip} and LLaVA \cite{liu2023llava} leverage joint vision-text embeddings to infer structured outputs. Given an image-text embedding $z = f_\theta(I, T)$, task-specific decoding is performed via:
+\begin{equation}
+    \hat{y} = \text{Decoder}(z),
+\end{equation}
+where $\text{Decoder}$ is a domain-adapted transformer head.
+
+E2E models significantly reduce error propagation but require large-scale annotated datasets for effective training. Their adoption is growing with advancements in multimodal pretraining strategies and self-supervised learning.
 
 
 \subsection{Dataset Creation}
-Since there was no dataset to evaluate or train, a custom dataset was created by manually annotating a collection of supermarket deal images. The dataset includes images with diverse layouts, fonts, and colors to ensure robustness. Each image is annotated with bounding boxes for text regions and corresponding labels for product name, brand, original price, deal price, and unit. The dataset is split into training, validation, and test sets to facilitate model development and evaluation. 
-% Table \ref{tab:dataset} provides an overview of the custom dataset and Figure \ref{fig:dataset} shows sample images with annotations.
-% TODO: Add table and figure
+Since the availability of German supermarket leaflet data is literally not findable, a custom dataset was created by manually annotating a collection of supermarket deal images. The dataset includes images from the most common supermarket chains, each with unique layout, fonts, and colors to, in general, ensure the highest diversity and robustness possible. Each image is annotated with a corresponding label file that includes the desired entities as well as the image_id. The dataset is split into a training and a validation set for each model to be trained and evaluated on. Table \tabref{tab:ie_dataset} provides an overview of the dataset with the sample size for each entity and \figref{fig:ie_dataset_samples} shows some sample images with their annotations.
 
-\subsection{Optical Character Recognition}
-Optical Character Recognition (OCR) is a critical component in the information extraction pipeline. Several OCR solutions were evaluated to determine the most suitable one for our task. The evaluated OCR tools include Tesseract, EasyOCR, PaddleOCR, and DocTR. Each tool was assessed based on its accuracy, speed, and ability to handle diverse fonts and layouts.
+\begin{table}[ht]
+\centering
+\caption{Leaflet-IE Dataset}
+\label{tab:ie_dataset}
+\begin{tabular}{ll}
+\toprule
+Entity           & Sample Size \\
+\midrule
+\code{image\_id}        & 372  \\
+\code{brand}            & 357  \\
+\code{product\_name}    & 370  \\
+\code{original\_price}  & 286  \\
+\code{deal\_price}      & 372  \\
+\code{weight}           & 369  \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Experiments}
-\indent{\textbf{Setup}.}
-The experiments were conducted to compare the performance of different OCR solutions and end-to-end models for information extraction. The evaluation metrics include precision, recall, and F1-score for each entity type (product name, brand, original price, deal price, and unit). The experiments were performed on the test set of the custom dataset.
+Even though the Leaflet-IE dataset is relatively small, the reader will be able to see that the dataset is sufficient to evaluate the performance of different IE appraoches as well as to train an competitive end-to-end model. However, as the reader may notice, the dataset is solely focused on single product deals at this point and explicitly does not include 
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox[c][3cm][c]{5cm}{\centering Figure Placeholder: Sample Annotation}}
+\caption{Sample images with annotations from the custom dataset.}
+\label{fig:ie_dataset_samples}
+\end{figure}
+
+% \subsection{Experiments}
+% - Goal: Find the best appraoch for our use case
+% - Research conducted > comparison on general performance, trends, and similar use cases > Identify candidate approaches > OCR + LLM, Donut, LVLM
+
+
+% # Implementation Details
+% - Hardware: 1. station with 1x NVIDIA RTX4080, 2. station with 1x NVIDIA GTX1080
+% - Software: PyTorch, HuggingFace Transformers, OpenCV
+
+% \subsubsection{Plain Deal OCR Performance}
+% - End case: Extract values from OCR.
+% - Tesseract, EasyOCR, PaddleOCR, DocTR
+% - Evaluation: 
+%     - Accuracy: can the values be found in the OCR output?
+%     - Ngram Accuracy: Can a ngram of the value be found in the OCR output? (ngrams of [len(value)//2,len(value)-1])
+
+%     - for better comparison, the ocr outputs (preds) were compared 1. raw (as it comes from the ocr), as well as 2. normalized
+%     - Normalization approach: 
+%     ```psuedo code
+%         REPLACEMENTS = {
+%             "ä": "a", 
+%             "ö": "o", 
+%             "ü": "u", 
+%             "ß": "ss", 
+%             ",": ".", 
+%             "€": "", 
+%             "–": " ", 
+%             "—": " ", 
+%             "−": " ", 
+%             "ô": "o", 
+%             "é": "e", 
+%             "ç": "c",
+%             "è": "e",
+%             "à": "a",
+%             "ê": "e",
+%             "â": "a",
+%             "û": "u",
+%             "î": "i",
+%             "ë": "e",
+%             "ï": "i",
+%             "œ": "oe",
+%             "æ": "ae",
+%             "ù": "u",
+%         }
+%         for key, value in REPLACEMENTS.items():
+%             text = text.replace(key, value)
+%         text = "".join([char for char in text if char.isalnum() or char in {".", " "}])
+%         text = "".join(text.split())
+        
+%         text = text.strip().lower()
+%         return text
+%     ```
+
+\section{Experiments}
+
+The primary objective of the experiments is to identify the most effective approach for extracting structured information from supermarket leaflets. The evaluation considers general performance trends and use cases to determine candidate methodologies, including OCR + LLM, Donut, and LVLM.
+
+
+
+\subsection{Implementation Details}
+
+\textbf{Hardware Configuration:} The experiments were conducted on two distinct computational setups:
+\begin{itemize}
+    \item Station 1: NVIDIA RTX 4080 GPU
+    \item Station 2: NVIDIA GTX 1080 GPU
+\end{itemize}
+
+\textbf{Software Stack:} The following libraries and frameworks were utilized:
+\begin{itemize}
+    \item PyTorch
+    \item HuggingFace Transformers
+    \item OpenCV
+\end{itemize}
+
+
+\subsection{Comparison of Hybrid OCR+LLM, Donut, and LVLM}
+- Comparison of Hybrid OCR+LLM, Donut, and LVLM
+- Evaluation on Leaflet-IE validation subset.
+- Evaluation Metrics: Accuracy, levenshtein distance
+
+- Sections X and Y show prepended studies to determine the best model in a selected candidate pool for OCR and LLM.
 
 \indent{\textbf{Results}.}
-The results of the experiments indicate that the end-to-end models, such as the Vision Encoder Decoder Model (e.g., Donut) and Large Vision-Language Models (LVLM), outperform traditional OCR-based methods in terms of accuracy and robustness. The OCR + LLM approach also shows promising results, particularly in handling OCR errors and extracting key-value pairs.
+TODO
 
-\subsection{Evaluation}
-The evaluation of the models was conducted using standard metrics, including precision, recall, and F1-score. The comparison between LVLM, OCR + LLM, and Donut models highlights the strengths and weaknesses of each approach. The results demonstrate that end-to-end models provide superior performance in extracting structured information from supermarket deal images.
+% SUB-STUDIES
+\subsection{Plain Deal OCR Performance}
+
+The baseline experiment focuses on the effectiveness of OCR models in extracting values directly from the document images.
+
+\textbf{Models Evaluated:}
+\begin{itemize}
+    \item Tesseract
+    \item EasyOCR
+    \item PaddleOCR
+    \item DocTR
+\end{itemize}
+
+- Data: All 372 samples of the Leaflet-IE dataset were used for evaluation since all OCR models probably have not seen the data before.
+
+\textbf{Evaluation Metrics:}
+\begin{itemize}
+    \item \textbf{Accuracy}: Measures whether the expected value is present in the OCR output.
+    \item \textbf{N-gram Accuracy}: Determines if an n-gram substring of the expected value exists in the OCR output, computed for $n \in \left[\frac{|v|}{2}, |v| - 1\right]$, where $|v|$ represents the string length.
+\end{itemize}
+
+To improve comparability, OCR outputs were evaluated in different levels of normalization.
+# Preprocessing function
+% def normalize_text(text, level=6):
+%     if not text or pd.isnull(text) or text == "":
+%         return ""
+    
+%     # Level 1: Basic cleaning (handles empty values)
+%     if level >= 1:
+%         text = str(text).strip()
+    
+%     # Level 2: Lowercasing & basic replacements (whitespace, German characters)
+%     if level >= 2:
+%         text = text.lower()
+%         text = text.replace("\n", " ").replace("\t", " ").replace("\r", " ")
+%         text = text.replace("ö", "o").replace("ä", "a").replace("ü", "u").replace("ß", "ss")
+    
+%     # Level 3: Extended normalization (remove special characters, normalize hyphens)
+%     if level >= 3:
+%         text = text.replace("-", " ").replace("–", " ").replace("—", " ").replace("−", " ")
+%         text = "".join([char for char in text if char.isalnum() or char in {".", " "}])
+%         text = " ".join(text.split())  # Remove extra spaces
+
+%     if level >= 4:
+%         text = text.replace(" ", "")
+%         text = text.replace(".", "")
+%     return text
+% TODO: In appendix
+% TODO: Continue
+
+
+\indent{\textbf{Results}.}
+TODO
+
+
+The performance comparison across different OCR models is visualized in Figure \ref{fig:ocr_results}, where each system's accuracy is evaluated across different deal structures. The raw and normalized outputs provide insights into the robustness of each approach in handling textual inconsistencies.
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=0.8\linewidth]{ocr_performance_plot.pdf}
+    \fbox{\parbox[c][5cm][c]{8cm}{\centering Figure Placeholder: OCR Model Performance}}
+    \caption{OCR Model Performance on Plain Deal Text Extraction}
+    \label{fig:ocr_results}
+\end{figure}
+
+
+\subsubsection{OCR + LLM Performance}
+Experiment Question: 
+-Which LLM is best suited to work with OCR outputs?
+-Which LLM + OCR combination works best in IE?
+
+
+Data:
+- All 372 samples of the Leaflet-IE dataset were used for evaluation since all OCR models as well as the LLMs probably have not seen the data before.
+
+The LLM is tasked via a prompt to extract the entities from the OCR output. 
+%TODO: Prompt in appendix
+
+
+Models Evaluated:
+-    "llama3.1_8b": "Llama 3.1 [8b, Q4]",
+-    "qwen2.5_1.5b-instruct-q8_0": "Qwen 2.5 [1.5b, Q8]",
+-    "llama3.2_3b-instruct-q8_0": "Llama 3.2 [3b, Q8]",
+-    "qwen2.5_7b": "Qwen 2.5 [7b, Q4]"
+
+Evaluation Metrics:
+- For each OCR: Per Entity accuracy and levenshtein distance between predictio
+
+Normalization:
+The reader might get confused with the normalization of the OCR experiment. Here, the decision was made to keep the OCR results as they are, as normalization may remove valuable information. In addition, the LLMs are considered to deal with such inconsistencies and errors as input.
+
+Here, to improve comparability, The entity values for the comparison between the LLM prediction and the ground truth value were compared in raw form as well as with a normalization prepended. The normalization function used is as follows:
+. The normalization procedure applied character replacements and filtering based on linguistic artifacts commonly encountered in OCR errors.
+
+% \textbf{Normalization Procedure:}
+
+% \begin{lstlisting}[language=Python, caption=Text Normalization Procedure]
+% REPLACEMENTS = {
+%     "ä": "a", "ö": "o", "ü": "u", "ß": "ss", ",": ".", "€": "",
+%     "–": " ", "—": " ", "−": " ", "ô": "o", "é": "e", "ç": "c",
+%     "è": "e", "à": "a", "ê": "e", "â": "a", "û": "u", "î": "i",
+%     "ë": "e", "ï": "i", "œ": "oe", "æ": "ae", "ù": "u"
+% }
+% def normalize(text):
+%     for key, value in REPLACEMENTS.items():
+%         text = text.replace(key, value)
+%     text = "".join([char for char in text if char.isalnum() or char in {".", " "}])
+%     text = "".join(text.split())
+%     return text.strip().lower()
+% \end{lstlisting}
+% TODO -> In appendix
+% TODO: Continue
+
+\indent{\textbf{Results}.}
+% TODO: Add results
+
+
+\subsection{Donut Fine-Tuning Performance}
+Experiment Question:
+- Is it possible to train a Vision Encoder Decoder model to extract end2end information from supermarket leaflet deal images?
 
 \section{Application}
+
 \subsection{Database}
-
-    
-\subsection{Optical Character Recognition}
-
-
-    \subsection{Experiments}
-    \indent{\textbf{Setup}.}
-    - Common OCR solutions: Tesseract, EasyOCR, PaddleOCR, DocTR
-    - Goal: Which OCR solution is the best for our task?
-    - 
 
 
 
