@@ -381,9 +381,19 @@ The averaged accuracies reveal that a higher number of parameters is more benefi
 When regarding the levenshtein distances, the results show similar trends. DocTR delivers by far the best OCR input across all OCR models. Suprisingly, Tesseract achieves lower levenshtein distances than PaddleOCR and EasyOCR, with EasyOCR being the worst across all models. This could be due to the fact that Tesseract delivers more often slightly wrong but still similar results, while EasyOCR delivers less often wrong but more different results. The LLMs show similar trends as in the accuracy evaluation, but Llama 3.1:8b now slightly outperforms Qwen 2.5:7b. The differences between the LLMs are less pronounced than in the accuracy evaluation, which can be attributed to the unnormalized levenshtein distance calculation used. \secref{app:ocr_llm_results} provides further results on entity-level accuracies and levenshtein distances for each OCR-LLM combination.
 
 \subsection{Donut Fine-Tuning Performance}
-The experiment aims to evaluate the fine-tuning performance of the Vision Encoder-Decoder model, Donut, pretrained on the CORD dataset, to determine its capability in extracting end-to-end information from supermarket leaflet deal images. Conducted on an NVIDIA RTX 4080 (Station 1), the model has a vocabulary size of 57,580 and 201M parameters. The training configuration includes 70 epochs, validation performed every epoch, gradient clipping at 2.0, 800 training samples per epoch, a learning rate of 8e-6, batch sizes of 16 for both training and validation, 400 warmup steps, and 16-bit mixed precision.
+The experiment aims to evaluate the fine-tuning performance of the Vision Encoder-Decoder model, Donut, pretrained on the CORD dataset, to determine its capability in extracting end-to-end information from supermarket leaflet deal images. Conducted on an NVIDIA RTX 4080 (Station 1), the model has a vocabulary size of 57,580 and 201M parameters. The training configuration includes 10 epochs, validation performed every epoch, gradient clipping at 2.0, 800 training samples per epoch, a learning rate of 8e-6, batch sizes of 16 for both training and validation, 400 warmup steps, and 16-bit mixed precision.
 
-Results:
+\indent{\textbf{Results}.} The training and validation losses of Donut during fine-tuning are depicted in \figref{fig:donut_loss}. The training loss decreases rapidly, while the validation loss remains high, indicating overfitting. The overfitting is likely due to the limited number of leaflet layouts in the training data, which restricts the model's ability to generalize to unseen layouts. This issue is visually less pronounced, as the text is relatively consistent across leaflets, but textually, the model struggles to generalize due to the diverse language and layout variations.
+
+\begin{figure*}
+    \begin{tabular}{cc}
+    \includegraphics[width=0.5\linewidth]{figures/donut_train_loss.png} &   \includegraphics[width=0.5\linewidth]{figures/donut_val_loss.png} \\
+    (a) Training Loss & (b) Validation Loss \\[6pt]
+    % \caption{Training and Validation Loss of Donut during Fine-Tuning.}
+    \label{fig:donut_loss}
+    \end{tabular}
+\end{figure*}
+
 
 \subsection{Comparison of Hybrid OCR+LLM, Donut, and LVLM}
 

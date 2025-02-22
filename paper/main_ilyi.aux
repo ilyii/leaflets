@@ -68,23 +68,24 @@
 \@writefile{toc}{\contentsline {paragraph}{Results:}{12}{section*.9}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Entity-Averaged Accuracy of LLM Models per Raw OCR Output. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{12}{figure.caption.10}\protected@file@percent }
 \newlabel{fig:eval_ocr_llm_accuracies_avg}{{7}{12}{Entity-Averaged Accuracy of LLM Models per Raw OCR Output. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.10}{}}
-\citation{yao2024}
-\citation{touvron2023}
 \@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output). a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{13}{figure.caption.11}\protected@file@percent }
 \newlabel{fig:eval_ocr_llm_levdist_avg}{{8}{13}{Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output). a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.11}{}}
+\newlabel{fig:donut_loss}{{\caption@xref {fig:donut_loss}{ on input line 393}}{13}{Donut Fine-Tuning Performance}{figure.caption.12}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Donut Fine-Tuning Performance}{13}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Comparison of Hybrid OCR+LLM, Donut, and LVLM}{13}{subsection.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}Experimental Setup}{13}{subsubsection.6.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-Entity Accuracy and Levenshtein Distance}{14}{section*.12}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{14}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:eval_final_acc_raw}{{9}{14}{Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{14}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:eval_final_levdis_raw}{{10}{14}{Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.14}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:eval_final_acc_norm}{{11}{15}{Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:eval_final_levdis_norm}{{12}{15}{Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.16}{}}
+\citation{yao2024}
+\citation{touvron2023}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Comparison of Hybrid OCR+LLM, Donut, and LVLM}{14}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}Experimental Setup}{14}{subsubsection.6.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Per-Entity Accuracy and Levenshtein Distance}{14}{section*.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{14}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:eval_final_acc_raw}{{9}{14}{Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:eval_final_levdis_raw}{{10}{15}{Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:eval_final_acc_norm}{{11}{15}{Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.16}{}}
 \bibdata{references}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{16}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:eval_final_levdis_norm}{{12}{16}{Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.17}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {7}Application}{16}{section.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Database}{16}{subsection.7.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {8}Application}{16}{section.8}\protected@file@percent }
@@ -96,18 +97,18 @@
 \@writefile{toc}{\contentsline {section}{\numberline {A}Appendices}{16}{appendix.A}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {A.1}OCR Evaluation: Normalization Procedure}{16}{subsection.A.1}\protected@file@percent }
 \newlabel{app:ocr_normalization}{{A.1}{16}{OCR Evaluation: Normalization Procedure}{subsection.A.1}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Text Normalization Function}}{16}{algorithm.1}\protected@file@percent }
-\newlabel{alg:normalization}{{1}{16}{Text Normalization Function}{algorithm.1}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Text Normalization Function}}{17}{algorithm.1}\protected@file@percent }
+\newlabel{alg:normalization}{{1}{17}{Text Normalization Function}{algorithm.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {A.2}LLM Prompt for Structured Information Extraction}{17}{subsection.A.2}\protected@file@percent }
 \newlabel{app:llm_prompt}{{A.2}{17}{LLM Prompt for Structured Information Extraction}{subsection.A.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {A.3}OCR + LLM Evaluation: Normalization Procedure}{18}{subsection.A.3}\protected@file@percent }
 \newlabel{app:ocr_llm_normalization}{{A.3}{18}{OCR + LLM Evaluation: Normalization Procedure}{subsection.A.3}{}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Text Normalization Procedure}}{18}{algorithm.2}\protected@file@percent }
 \newlabel{alg:final_normalization}{{2}{18}{Text Normalization Procedure}{algorithm.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}OCR + LLM Evaluation: Entity-specific results per OCR model}{18}{subsection.A.4}\protected@file@percent }
-\newlabel{app:ocr_llm_results}{{A.4}{18}{OCR + LLM Evaluation: Entity-specific results per OCR model}{subsection.A.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{19}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:eval_ocr_llm_accuracies}{{13}{19}{LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{19}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:eval_ocr_llm_levdistances}{{14}{19}{LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.18}{}}
-\gdef \@abspage@last{19}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}OCR + LLM Evaluation: Entity-specific results per OCR model}{19}{subsection.A.4}\protected@file@percent }
+\newlabel{app:ocr_llm_results}{{A.4}{19}{OCR + LLM Evaluation: Entity-specific results per OCR model}{subsection.A.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{19}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_accuracies}{{13}{19}{LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.18}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{20}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_levdistances}{{14}{20}{LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.19}{}}
+\gdef \@abspage@last{20}
