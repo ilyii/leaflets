@@ -363,7 +363,7 @@ def evaluate_entity_per_llm(pred_df, target_df, preprocessing_level=3):
                         pred_value = ""
                     pred_value = final_normalize_text(str(pred_value))
                     
-                    print("Target:", target_value, "Pred:", pred_value)
+                    # print("Target:", target_value, "Pred:", pred_value)
                     accuracies[model][entity].append(1 if pred_value == target_value else 0)
                     levdistances[model][entity].append(jellyfish.levenshtein_distance(str(pred_value), str(target_value)))
                 else:
@@ -374,7 +374,22 @@ def evaluate_entity_per_llm(pred_df, target_df, preprocessing_level=3):
 
 
 def visualize_accuracies(accuracies, outname):
-    sns.set_theme(style="whitegrid")
+    FONTSIZE = 28
+    plt.style.use('seaborn-v0_8-paper')
+    plt.rcParams.update({
+        'font.size': FONTSIZE,
+        'font.family': 'serif',
+        'font.serif': 'Palatino',
+        'axes.titlesize': 'medium',
+        'figure.titlesize': 'medium',
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+        'figure.figsize': (4.9, 3.5),
+        'xtick.labelsize': FONTSIZE,
+        'ytick.labelsize': FONTSIZE,
+        'legend.fontsize': FONTSIZE,
+        'figure.dpi': 300
+    })
     
     data = []
     for model, entity_acc in accuracies.items():
@@ -384,29 +399,45 @@ def visualize_accuracies(accuracies, outname):
     df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
     
     # Create grouped bar plot
-    fig, ax = plt.subplots(figsize=(14, 10))
+    fig, ax = plt.subplots(figsize=(16,9))
     sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
     
     # ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Accuracy", fontsize=12)
-    ax.set_xlabel("Models", fontsize=12)
+    ax.set_ylabel("Accuracy", fontsize=FONTSIZE)
+    ax.set_xlabel("Models", fontsize=FONTSIZE)
     # Update xtick labels
-    ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["Model"].unique()], ha="center", fontsize=10)
+    ax.set_xticklabels(["a)", "b)", "c)", "d)"], ha="center", fontsize=FONTSIZE)
 
     # Update legend labels
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity")
+    ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity", fontsize=FONTSIZE, bbox_to_anchor=(1.3, 1), loc='upper right')
 
     # Add bar labels
-    for container in ax.containers:
-        ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+    # for container in ax.containers:
+    #     ax.bar_label(container, fmt="%.2f", fontsize=FONTSIZE, padding=3)
 
-    plt.tight_layout()
     plt.savefig(f"{outname}.png", dpi=400, bbox_inches="tight")
 
 
 def visualize_levdistances(levdistances, outname):
-    sns.set_theme(style="whitegrid")
+    FONTSIZE = 28
+    # Set plot style for scientific papers
+    plt.style.use('seaborn-v0_8-paper')
+    plt.rcParams.update({
+        'font.size': FONTSIZE,
+        'font.family': 'serif',
+        'font.serif': 'Palatino',
+        'axes.titlesize': 'medium',
+        'figure.titlesize': 'medium',
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+        'figure.figsize': (16,9),
+        'xtick.labelsize': FONTSIZE,
+        'ytick.labelsize': FONTSIZE,
+        'legend.fontsize': FONTSIZE,
+        'figure.dpi': 300
+    })
+
     
     data = []
     for model, entity_lev in levdistances.items():
@@ -415,23 +446,22 @@ def visualize_levdistances(levdistances, outname):
     
     df = pd.DataFrame(data, columns=["Model", "Entity", "Levenshtein Distance"])
     
-    fig, ax = plt.subplots(figsize=(14, 10))
+    fig, ax = plt.subplots()
     sns.barplot(data=df, x="Model", y="Levenshtein Distance", hue="Entity", ax=ax, palette="Set2")
 
     # ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Levenshtein Distance", fontsize=12)
-    ax.set_xlabel("Models", fontsize=12)
+    ax.set_ylabel("Levenshtein Distance", fontsize=FONTSIZE)
+    ax.set_xlabel("Models", fontsize=FONTSIZE)
 
     # Update xtick labels
-    ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["Model"].unique()], ha="center", fontsize=10)
-
+    ax.set_xticklabels(["a)", "b)", "c)", "d)"], ha="center", fontsize=FONTSIZE)
     # Update legend labels
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity")
+    ax.legend(handles, [LABELS_MAPPING[label] for label in labels], title="Entity", fontsize=FONTSIZE, bbox_to_anchor=(1.3, 1), loc='upper right')
 
-    # Add bar labels
-    for container in ax.containers:
-        ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+    # # Add bar labels
+    # for container in ax.containers:
+    #     ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
 
     plt.tight_layout()
     plt.savefig(f"{outname}.png", dpi=400, bbox_inches="tight")
@@ -569,8 +599,8 @@ def main(level=1,
         accuracies, levdistances = evaluate_entity_per_llm(ocr_model_df, labels_df, preprocessing_level=level)
         accuracies_dict[ocrmodel] = accuracies
         levdistances_dict[ocrmodel] = levdistances
-        # visualize_accuracies(accuracies, outname=f"./plots/{ocrmodel}_accuracies")
-        # visualize_levdistances(levdistances, outname=f"./plots/{ocrmodel}_levdistances")
+        visualize_accuracies(accuracies, outname=f"./plots/{ocrmodel}_accuracies")
+        visualize_levdistances(levdistances, outname=f"./plots/{ocrmodel}_levdistances")
 
     # Average entities
     # For each OCR
@@ -588,7 +618,23 @@ def main(level=1,
 
     
     def visualize_avg_accuracies(accuracies, outname):
-        sns.set_theme(style="whitegrid")
+        FONTSIZE = 28
+        # Set plot style for scientific papers
+        plt.style.use('seaborn-v0_8-paper')
+        plt.rcParams.update({
+            'font.size': FONTSIZE,
+            'font.family': 'serif',
+            'font.serif': 'Palatino',
+            'axes.titlesize': 'medium',
+            'figure.titlesize': 'medium',
+            'text.usetex': True,
+            'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+            'figure.figsize': (16, 9),
+            'xtick.labelsize': FONTSIZE,
+            'ytick.labelsize': FONTSIZE,
+            'legend.fontsize': FONTSIZE,
+            'figure.dpi': 300
+        })
         
         data = []
         for model, entity_acc in accuracies.items():
@@ -598,29 +644,45 @@ def main(level=1,
         df = pd.DataFrame(data, columns=["Model", "LLM", "Accuracy"])
         
         # Create grouped bar plot
-        fig, ax = plt.subplots(figsize=(14, 10))
+        fig, ax = plt.subplots()
         sns.barplot(data=df, x="LLM", y="Accuracy", hue="Model", ax=ax, palette="Set2")
         
         # ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
-        ax.set_ylabel("Accuracy", fontsize=12)
-        ax.set_xlabel("LLM", fontsize=12)
+        ax.set_ylabel("Accuracy", fontsize=FONTSIZE)    
+        ax.set_xlabel("LLM", fontsize=FONTSIZE)
         # Update xtick labels
-        ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["LLM"].unique()], ha="center", fontsize=10)
+        ax.set_xticklabels(["a)", "b)", "c)", "d)"], ha="center", fontsize=FONTSIZE)
 
         # Update legend labels
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR")
+        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR", fontsize=FONTSIZE, bbox_to_anchor=(1.3, 1), loc='upper right')
 
         # Add bar labels
-        for container in ax.containers:
-            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        # for container in ax.containers:
+        #     ax.bar_label(container, fmt="%.2f", padding=3)
 
         plt.tight_layout()
         plt.savefig(f"{outname}.png", dpi=400, bbox_inches="tight")
 
     
     def visualize_avg_levdistances(levdistances, outname):
-        sns.set_theme(style="whitegrid")
+        FONTSIZE = 28
+        # Set plot style for scientific papers
+        plt.style.use('seaborn-v0_8-paper')
+        plt.rcParams.update({
+            'font.size': FONTSIZE,
+            'font.family': 'serif',
+            'font.serif': 'Palatino',
+            'axes.titlesize': 'medium',
+            'figure.titlesize': 'medium',
+            'text.usetex': True,
+            'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+            'figure.figsize': (16, 9),
+            'xtick.labelsize': FONTSIZE,
+            'ytick.labelsize': FONTSIZE,
+            'legend.fontsize': FONTSIZE,
+            'figure.dpi': 300
+        })
         
         data = []
         for model, entity_lev in levdistances.items():
@@ -629,23 +691,23 @@ def main(level=1,
         
         df = pd.DataFrame(data, columns=["Model", "LLM", "Levenshtein Distance"])
         
-        fig, ax = plt.subplots(figsize=(14, 10))
+        fig, ax = plt.subplots()
         sns.barplot(data=df, x="LLM", y="Levenshtein Distance", hue="Model", ax=ax, palette="Set2")
 
         # ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
-        ax.set_ylabel("Levenshtein Distance", fontsize=12)
-        ax.set_xlabel("LLM", fontsize=12)
+        ax.set_ylabel("Levenshtein Distance", fontsize=FONTSIZE)
+        ax.set_xlabel("LLM", fontsize=FONTSIZE)
 
         # Update xtick labels
-        ax.set_xticklabels([LLMMODELS_MAPPING[model] for model in df["LLM"].unique()], ha="center", fontsize=10)
+        ax.set_xticklabels(["a)", "b)", "c)", "d)"], ha="center", fontsize=FONTSIZE)
 
         # Update legend labels
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR")
+        ax.legend(handles, [OCRMODELS_MAPPING[label] for label in labels], title="OCR", fontsize=FONTSIZE, bbox_to_anchor=(1.3, 1), loc='upper right')
 
-        # Add bar labels
-        for container in ax.containers:
-            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        # # Add bar labels
+        # for container in ax.containers:
+        #     ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
 
         plt.tight_layout()
         plt.savefig(f"{outname}.png", dpi=400, bbox_inches="tight")

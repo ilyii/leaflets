@@ -109,7 +109,8 @@
 % \titlebox should be a multiple of \baselineskip so that
 % column height remaining fits an exact number of lines of text
 
-\flushbottom \twocolumn \sloppy
+% \twocolumn 
+\flushbottom \sloppy
 
 % We're never going to need a table of contents, so just flush it to
 % save space --- suggested by drstrip@sandia-2
@@ -140,7 +141,8 @@
 \def\maketitle{\par
  \begingroup
    \def\thefootnote{\fnsymbol{footnote}}
-   \twocolumn[\@maketitle]
+  %  \twocolumn[\@maketitle]
+   \@maketitle
    \@thanks
  \endgroup
  \setcounter{footnote}{0}

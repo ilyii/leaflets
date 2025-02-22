@@ -156,7 +156,7 @@ def final_normalize_text(text):
 def final_normalize_prices(price_text):
     # Replace commas with dots
     price_text = price_text.replace(",", ".")
-    # Only keep numbers and dots
+    # # Only keep numbers and dots
     price_text = "".join([char for char in price_text if char.isdigit() or char == "."])
     
     return price_text
@@ -474,47 +474,82 @@ def main(level=1,
     }
 
     def visualize_accuracies_comparsion(model_list, accuracies_results_dict, outname):
-        sns.set_theme(style="whitegrid")
+        FONTSIZE = 28
+        # Set plot style for scientific papers
+        plt.style.use('seaborn-v0_8-paper')
+        plt.rcParams.update({
+            'font.size': FONTSIZE,
+            'font.family': 'serif',
+            'font.serif': 'Palatino',
+            'axes.titlesize': 'medium',
+            'figure.titlesize': 'medium',
+            'text.usetex': True,
+            'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+            'figure.figsize': (16, 9),
+            'xtick.labelsize': FONTSIZE,
+            'ytick.labelsize': FONTSIZE,
+            'legend.fontsize': FONTSIZE,
+            'figure.dpi': 300
+        })
         data = []
         for model in model_list:
             for entity, acc in accuracies_results_dict[model].items():
                 data.append((model, entity, np.mean(acc)))
         df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
-        fig, ax = plt.subplots(figsize=(14, 10))
+        fig, ax = plt.subplots()
         sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
-        ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
-        ax.set_ylabel("Accuracy", fontsize=12)
-        ax.set_xlabel("Models", fontsize=12)
-        ax.set_xticklabels([MODELS[model] for model in model_list], ha="center", fontsize=10)
+        ax.set_ylabel("Accuracy", fontsize=FONTSIZE)
+        ax.set_xlabel("Models", fontsize=FONTSIZE)
+        ax.set_xticklabels(["a)", "b)", "c)", "d)", "e)"], ha="center")
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
-        for container in ax.containers:
-            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        ax.legend(handles, [LABELS[label] for label in labels], title="Entity", fontsize=FONTSIZE, bbox_to_anchor=(1.4, 1), loc='upper right')
+        # for container in ax.containers:
+            # ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
         plt.tight_layout()
         plt.savefig(outname, dpi=400, bbox_inches="tight")
 
     def visualize_levdistances_comparsion(model_list, levdistances_results_dict, outname):
-        sns.set_theme(style="whitegrid")
+        FONTSIZE = 28
+        # Set plot style for scientific papers
+        plt.style.use('seaborn-v0_8-paper')
+        plt.rcParams.update({
+            'font.size': FONTSIZE,
+            'font.family': 'serif',
+            'font.serif': 'Palatino',
+            'axes.titlesize': 'medium',
+            'figure.titlesize': 'medium',
+            'text.usetex': True,
+            'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+            'figure.figsize': (16, 9),
+            'xtick.labelsize': FONTSIZE,
+            'ytick.labelsize': FONTSIZE,
+            'legend.fontsize': FONTSIZE,
+            'figure.dpi': 300
+        })
+
         data = []
         for model in model_list:
             for entity, lev in levdistances_results_dict[model].items():
                 data.append((model, entity, np.mean(lev)))
         df = pd.DataFrame(data, columns=["Model", "Entity", "Levenshtein Distance"])
-        fig, ax = plt.subplots(figsize=(14, 10))
+        fig, ax = plt.subplots()
         sns.barplot(data=df, x="Model", y="Levenshtein Distance", hue="Entity", ax=ax, palette="Set2")
-        ax.set_title("Levenshtein Distance per Model and Entity", fontsize=14, fontweight="bold")
-        ax.set_ylabel("Levenshtein Distance", fontsize=12)
-        ax.set_xlabel("Models", fontsize=12)
-        ax.set_xticklabels([MODELS[model] for model in model_list], ha="center", fontsize=10)
+        ax.set_ylabel("Levenshtein Distance", fontsize=FONTSIZE)
+        ax.set_xlabel("Models", fontsize=FONTSIZE)
+        ax.set_xticklabels(["a)", "b)", "c)", "d)", "e)"], ha="center")
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
-        for container in ax.containers:
-            ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+        ax.legend(handles, [LABELS[label] for label in labels], title="Entity", bbox_to_anchor=(1.4, 1), loc='upper right')
+        # for container in ax.containers:
+            # ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
         plt.tight_layout()
         plt.savefig(outname, dpi=400, bbox_inches="tight")
 
+    # visualize_accuracies_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], accuracies_results, "accuracies_raw.png")
+    # visualize_levdistances_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], levdistances_results, "levdistances_raw.png")
+
     visualize_accuracies_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], accuracies_results, "accuracies_norm.png")
     visualize_levdistances_comparsion(["donut", "llm_1", "llm_2", "lvlm_1", "lvlm_2"], levdistances_results, "levdistances_norm.png")
+
 
 
 
@@ -532,8 +567,8 @@ if __name__ == "__main__":
         "MODELS_DIR": os.path.join(PROJECT_DIR, "models"),
 
         "RESULTS_PATHS":{
-            "LLM_RESULTS_PATH_1": os.path.join(RESULTS_DIR,"llm_results_qwen2.5_7b.pkl"),
-            "LLM_RESULTS_PATH_2": os.path.join(RESULTS_DIR,"llm_results_llama3.1_8b.pkl"),
+            "LLM_RESULTS_PATH_1": os.path.join(r"D:\OneDrives\OneDrive\Gabrilyi\leaflet_project\information_extraction\llm_results_v1", "llm_results_qwen2.5_7b.pkl"),
+            "LLM_RESULTS_PATH_2": os.path.join(r"D:\OneDrives\OneDrive\Gabrilyi\leaflet_project\information_extraction\llm_results_v1", "llm_results_llama3.1_8b.pkl"),
             "DONUT_RESULTS_PATH": os.path.join(RESULTS_DIR,"donut_results.csv"),
             "LVLM_RESULTS_PATH_1": os.path.join(RESULTS_DIR,"vlm_results","llama3_2-vision_results.csv"),
             "LVLM_RESULTS_PATH_2": os.path.join(RESULTS_DIR,"vlm_results","minicpm-v_results.csv"),

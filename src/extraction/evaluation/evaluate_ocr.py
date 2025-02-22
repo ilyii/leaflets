@@ -244,9 +244,27 @@ def evaluate(pred_df, target_df):
     return accuracies, ngram_accuracies, sample_sizes
 
 
+
 def visualize_accuracies(accuracies, out_name):
-    sns.set_theme(style="whitegrid")
-    
+    FONTSIZE = 28
+    # Set plot style for scientific papers
+    plt.style.use('seaborn-v0_8-paper')
+    plt.rcParams.update({
+        'font.size': FONTSIZE,
+        'font.family': 'serif',
+        'font.serif': 'Palatino',
+        'axes.titlesize': 'medium',
+        'figure.titlesize': 'medium',
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{amsmath}\usepackage{amssymb}\usepackage{siunitx}[=v2]',
+        'figure.figsize': (16, 9),
+        'xtick.labelsize': FONTSIZE,
+        'ytick.labelsize': FONTSIZE,
+        'legend.fontsize': FONTSIZE,
+        'figure.dpi': 300
+    })
+
+    # Prepare data
     data = []
     for model, entity_acc in accuracies.items():
         for entity, acc in entity_acc.items():
@@ -255,24 +273,26 @@ def visualize_accuracies(accuracies, out_name):
     df = pd.DataFrame(data, columns=["Model", "Entity", "Accuracy"])
     
     # Create grouped bar plot
-    fig, ax = plt.subplots(figsize=(14, 10))
+    fig, ax = plt.subplots(figsize=(16,9))
     sns.barplot(data=df, x="Model", y="Accuracy", hue="Entity", ax=ax, palette="Set2")
     
-    ax.set_title("Accuracy per Model and Entity", fontsize=14, fontweight="bold")
-    ax.set_ylabel("Accuracy", fontsize=12)
-    ax.set_xlabel("Models", fontsize=12)
+    # Set titles and labels
+    # ax.set_title("Accuracy per Model and Entity", fontsize=12)
+    ax.set_ylabel("Accuracy", fontsize=FONTSIZE)
+    ax.set_xlabel("OCR Models", fontsize=FONTSIZE)
+
     # Update xtick labels
-    ax.set_xticklabels([MODELS[model] for model in df["Model"].unique()], ha="center", fontsize=10)
+    ax.set_xticklabels([MODELS[model] for model in df["Model"].unique()], ha="center", fontsize=FONTSIZE)
 
     # Update legend labels
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles, [LABELS[label] for label in labels], title="Entity")
+    ax.legend(handles, [LABELS[label] for label in labels], title="Entity", fontsize=FONTSIZE, bbox_to_anchor=(1.3, 1), loc='upper right')
 
     # Add bar labels
-    for container in ax.containers:
-        ax.bar_label(container, fmt="%.2f", fontsize=10, padding=3)
+    # for container in ax.containers:
+        # ax.bar_label(container, fmt="%.2f", fontsize=FONTSIZE, padding=3)
 
-    plt.tight_layout()
+    # Adjust layout and save
     plt.savefig(f"{out_name}.png", dpi=400, bbox_inches="tight")
 
                     
@@ -321,6 +341,7 @@ def main(level=1,
 
 
     if OCR_RESULTS_PATH:
+        print("Loading OCR results...")
         preds_df = pd.read_csv(OCR_RESULTS_PATH)
     else:
         ocr_results = ocr(labels_df["img_path"])
@@ -360,7 +381,7 @@ if __name__ == "__main__":
 
     args = {
         "PROJECT_DIR": PROJECT_DIR,
-        "LABELS_PATH": os.path.join(RESULTS_DIR, "val_deals.csv"),
+        "LABELS_PATH": os.path.join(RESULTS_DIR, "labeled_deals_all_imgpath.csv"),
         "OCR_RESULTS_PATH": os.path.join(RESULTS_DIR,"ocr_results_plain.csv"),
 
 

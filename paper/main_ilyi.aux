@@ -6,76 +6,108 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{1}{subsection.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Problem Statement}{1}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contributions}{2}{subsection.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {2}Related Works}{3}{section.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3}Nature of Supermarket Leaflet Data}{3}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Deal Detection}{3}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Datasets}{3}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Model}{3}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experiments}{3}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Information Extraction of Supermarket Deals}{3}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Challenges in Information Extraction for Supermarket Deals}{4}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Formal Approach}{4}{subsection.5.2}\protected@file@percent }
-\citation{shi2016crnn}
-\citation{kim2022donut}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Architectural Approaches to Information Extraction}{5}{subsection.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Traditional Multi-Stage Methods}{5}{subsection.5.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Hybrid OCR-LLM Models}{5}{subsection.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}End-to-End Models}{5}{subsection.5.6}\protected@file@percent }
-\citation{li2022blip}
-\citation{liu2023llava}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Dataset Creation}{6}{subsection.5.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Leaflet-IE Dataset}}{6}{table.caption.1}\protected@file@percent }
+\citation{ladwig2023}
+\citation{arroyo2020}
+\citation{zhang2024}
+\citation{nandkumar2024}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overview of the proposed approach to digitalizing and structuring supermarket leaflet information.}}{2}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:ie_dataset}{{1}{6}{Leaflet-IE Dataset}{table.caption.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments}{6}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Implementation Details}{6}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Plain Deal OCR Performance}{6}{subsection.6.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Sample images with annotations from the custom dataset.}}{7}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:ie_dataset_samples}{{1}{7}{Sample images with annotations from the custom dataset}{figure.caption.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Accuracy per Entity of OCR Models at Different Normalization Levels.}}{8}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:eval_ocr_accuracies}{{2}{8}{Accuracy per Entity of OCR Models at Different Normalization Levels}{figure.caption.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces N-gram Accuracy per Entity of OCR Models at Different Normalization Levels.}}{8}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:eval_ocr_ngram_accuracies}{{3}{8}{N-gram Accuracy per Entity of OCR Models at Different Normalization Levels}{figure.caption.4}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.1}Hybrid-OCR+LLM Performance}{9}{subsubsection.6.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Models Evaluated:}{9}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Results:}{9}{section*.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Donut Fine-Tuning Performance}{9}{subsection.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Comparison of Hybrid OCR+LLM, Donut, and LVLM}{9}{subsection.6.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Entity-Averaged Accuracy of LLM Models per Raw OCR Output.}}{10}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:eval_ocr_llm_accuracies_avg}{{4}{10}{Entity-Averaged Accuracy of LLM Models per Raw OCR Output}{figure.caption.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output).}}{10}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:eval_ocr_llm_levdist_avg}{{5}{10}{Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output)}{figure.caption.8}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}Experimental Setup}{10}{subsubsection.6.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Models.}{10}{section*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Dataset.}{11}{section*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Evaluation Metrics.}{11}{section*.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Normalization.}{11}{section*.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.2}Results and Discussion}{11}{subsubsection.6.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-Entity Accuracy Without Normalization}{11}{section*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-Entity Levenshtein Distance Without Normalization}{11}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-Entity Accuracy With Normalization}{11}{section*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Per-Entity Levenshtein Distance With Normalization}{11}{section*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.3}Conclusions}{11}{subsubsection.6.4.3}\protected@file@percent }
+\newlabel{fig:overview}{{1}{2}{Overview of the proposed approach to digitalizing and structuring supermarket leaflet information}{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contributions}{2}{subsection.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Structure}{2}{subsection.1.4}\protected@file@percent }
+\citation{liao2019,liao2022}
+\citation{shi2015,li2022}
+\citation{shi2019}
+\citation{pham2022}
+\citation{zhao2018}
+\citation{brown2020}
+\citation{touvron2023}
+\citation{yenduri2023}
+\citation{vaswani2017,dosovitskiy2021}
+\citation{kim2022}
+\citation{appalaraju2021}
+\citation{peng2022,li2021}
+\citation{touvron2023}
+\citation{qwen2025}
+\citation{dai2023}
+\citation{li2024,wei2024}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Works}{3}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}The Nature of Supermarket Leaflet Data}{3}{section.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Common German supermarket deals.}}{4}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:leaflet_data_samples}{{2}{4}{Common German supermarket deals}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Deal Detection}{4}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Datasets}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Model}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experiments}{4}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Information Extraction of Supermarket Deals}{4}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Approaches to Information Extraction}{5}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Traditional and Hybrid Approaches for Supermarket Leaflet Information Extraction}{5}{subsubsection.5.1.1}\protected@file@percent }
+\citation{kim2022}
+\citation{touvron2023}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}End-to-End Models}{6}{subsubsection.5.1.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces End-to-End Vision-Encoder-Decoder Architecture.}}{7}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:e2e_arch}{{3}{7}{End-to-End Vision-Encoder-Decoder Architecture}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Dataset Creation}{7}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Leaflet-IE Dataset}}{8}{table.caption.4}\protected@file@percent }
+\newlabel{tab:ie_dataset}{{1}{8}{Leaflet-IE Dataset}{table.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Sample images with annotations from the custom dataset.}}{8}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:ie_dataset_samples}{{4}{8}{Sample images with annotations from the custom dataset}{figure.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments}{8}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Implementation Details}{9}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Plain Deal OCR Performance}{9}{subsection.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Per-Entity Accuracy of OCR Models at Different Normalization Levels.}}{10}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:eval_ocr_accuracies}{{5}{10}{Per-Entity Accuracy of OCR Models at Different Normalization Levels}{figure.caption.6}{}}
+\citation{touvron2023}
+\citation{qwen2025}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Per-Entity N-Gram Accuracy of OCR Models at Different Normalization Levels.}}{11}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:eval_ocr_ngram_accuracies}{{6}{11}{Per-Entity N-Gram Accuracy of OCR Models at Different Normalization Levels}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.2.1}Hybrid-OCR+LLM Performance}{11}{subsubsection.6.2.1}\protected@file@percent }
+\citation{touvron2023}
+\citation{qwen2025}
+\@writefile{toc}{\contentsline {paragraph}{Models Evaluated:}{12}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results:}{12}{section*.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Entity-Averaged Accuracy of LLM Models per Raw OCR Output. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{12}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_accuracies_avg}{{7}{12}{Entity-Averaged Accuracy of LLM Models per Raw OCR Output. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.10}{}}
+\citation{yao2024}
+\citation{touvron2023}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output). a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{13}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_levdist_avg}{{8}{13}{Entity-Averaged Levenshtein Distance of OCR-LLM Models (Raw OCR Output). a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Donut Fine-Tuning Performance}{13}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Comparison of Hybrid OCR+LLM, Donut, and LVLM}{13}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.4.1}Experimental Setup}{13}{subsubsection.6.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Per-Entity Accuracy and Levenshtein Distance}{14}{section*.12}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{14}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:eval_final_acc_raw}{{9}{14}{Per-Entity Accuracy without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{14}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:eval_final_levdis_raw}{{10}{14}{Per-Entity Levenshtein Distance without normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:eval_final_acc_norm}{{11}{15}{Per-Entity Accuracy with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision.}}{15}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:eval_final_levdis_norm}{{12}{15}{Per-Entity Levenshtein Distance with normalization. a: Donut, b: docTR + Qwen 2.5 [7b, Q4], c: docTR + Llama 3.1 [8b, Q4], d: MiniCPM-V, e: Llama3.2-Vision}{figure.caption.16}{}}
 \bibdata{references}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Application}{12}{section.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Database}{12}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {8}Application}{12}{section.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {9}Database}{12}{section.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {10}Front End / Webapp}{12}{section.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {11}Conclusion}{12}{section.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Summary}{12}{subsection.11.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}Future Work}{12}{subsection.11.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Appendices}{12}{appendix.A}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}OCR Evaluation:Normalization Procedure}{12}{subsection.A.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}LLM Prompt}{12}{subsection.A.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}OCR + LLM Evaluation: Normalization Procedure}{12}{subsection.A.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Per-Entity Accuracy without normalization.}}{13}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:eval_final_acc_raw}{{6}{13}{Per-Entity Accuracy without normalization}{figure.caption.17}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Per-Entity Levenshtein Distance without normalization.}}{13}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:eval_final_levdis_raw}{{7}{13}{Per-Entity Levenshtein Distance without normalization}{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Per-Entity Accuracy with normalization.}}{14}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:eval_final_acc_norm}{{8}{14}{Per-Entity Accuracy with normalization}{figure.caption.19}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Per-Entity Levenshtein Distance with normalization.}}{14}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:eval_final_levdis_norm}{{9}{14}{Per-Entity Levenshtein Distance with normalization}{figure.caption.20}{}}
-\gdef \@abspage@last{14}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Application}{16}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Database}{16}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Application}{16}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Database}{16}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Front End / Webapp}{16}{section.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {11}Conclusion}{16}{section.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.1}Summary}{16}{subsection.11.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {11.2}Future Work}{16}{subsection.11.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Appendices}{16}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}OCR Evaluation: Normalization Procedure}{16}{subsection.A.1}\protected@file@percent }
+\newlabel{app:ocr_normalization}{{A.1}{16}{OCR Evaluation: Normalization Procedure}{subsection.A.1}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Text Normalization Function}}{16}{algorithm.1}\protected@file@percent }
+\newlabel{alg:normalization}{{1}{16}{Text Normalization Function}{algorithm.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}LLM Prompt for Structured Information Extraction}{17}{subsection.A.2}\protected@file@percent }
+\newlabel{app:llm_prompt}{{A.2}{17}{LLM Prompt for Structured Information Extraction}{subsection.A.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}OCR + LLM Evaluation: Normalization Procedure}{18}{subsection.A.3}\protected@file@percent }
+\newlabel{app:ocr_llm_normalization}{{A.3}{18}{OCR + LLM Evaluation: Normalization Procedure}{subsection.A.3}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Text Normalization Procedure}}{18}{algorithm.2}\protected@file@percent }
+\newlabel{alg:final_normalization}{{2}{18}{Text Normalization Procedure}{algorithm.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}OCR + LLM Evaluation: Entity-specific results per OCR model}{18}{subsection.A.4}\protected@file@percent }
+\newlabel{app:ocr_llm_results}{{A.4}{18}{OCR + LLM Evaluation: Entity-specific results per OCR model}{subsection.A.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{19}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_accuracies}{{13}{19}{LLM accuracies per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}}{19}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:eval_ocr_llm_levdistances}{{14}{19}{LLM Levenshtein Distances per Entity for different OCR models. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4]}{figure.caption.18}{}}
+\gdef \@abspage@last{19}
