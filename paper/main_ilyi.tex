@@ -7,33 +7,33 @@
 
 % Change "review" to "final" to generate the final (sometimes called camera-ready) version.
 % Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage{lib}
+\RequirePackage{lib}
 
 % Standard package includes
-\usepackage{times}
-\usepackage{latexsym}
+\RequirePackage{times}
+\RequirePackage{latexsym}
 
 % For proper rendering and hyphenation of words containing Latin characters (including in bib files)
-\usepackage[T1]{fontenc}
+\RequirePackage[T1]{fontenc}
 
 % This assumes your files are encoded as UTF8
-\usepackage[utf8]{inputenc}
+\RequirePackage[utf8]{inputenc}
 
-\usepackage{microtype}
+\RequirePackage{microtype}
 
-\usepackage{inconsolata}
+\RequirePackage{inconsolata}
 
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{multirow}
-\usepackage{booktabs}
-\usepackage{amssymb}
-\usepackage{hyperref}
-\usepackage{subfig}
+\RequirePackage{graphicx}
+\RequirePackage{amsmath}
+\RequirePackage{multirow}
+\RequirePackage{booktabs}
+\RequirePackage{amssymb}
+\RequirePackage{hyperref}
+\RequirePackage{subfig}
 
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usepackage{verbatim}
+\RequirePackage{algorithm}
+\RequirePackage{algpseudocode}
+\RequirePackage{verbatim}
 
 % If the title and author information does not fit in the area allocated, uncomment the following
 %
@@ -105,7 +105,7 @@ This work is structured to systematically address supermarket deal detection and
 The field of supermarket leaflet analysis has evolved to tackle key challenges such as product classification, promotion identification, and customer interaction. Recent studies have leveraged AI-driven techniques to enhance efficiency and accuracy in this domain. For instance, Ladwig et al. \cite{ladwig2023} explore fine-grained product classification in leaflet advertisements, while Arroyo et al. \cite{arroyo2020} employ multi-label classification methods to analyze promotions using both textual and visual information. Additionally, Zhang et al. \cite{zhang2024} introduce PKU-GoodsAD, a dataset designed for unsupervised anomaly detection and segmentation of supermarket goods. Complementing these efforts, Nandkumar et al. \cite{nandkumar2024} propose a multi-level LLM conversational interface to enhance supermarket robot interactions by handling diverse customer intents.
 
 \indent{\textbf{Deal Detection}.}
-
+There are no direct approaches for detecting deals, including product image, price, name and more, in supermarket leaflets. However, the detection of specific elements in documents, or more generally, the detection of objects in images, is a widely researched area. When it comes to just the actual detection of these elements without understanding the semantic meaning, models such as YOLO or Faster R-CNN prove to be effective. These models are able to recognize objects in images and mark them with bounding boxes and further classify them. But because there is no direct research on the detection of deals in supermarket leaflets, the research has to be done in this area.
 
 \indent{\textbf{Information Extraction}.}
 Recent advancements in Optical Character Recognition (OCR), Large Language Models (LLMs), and end-to-end multimodal architectures have significantly refined the landscape of document information extraction. These improvements have led to increased accuracy, efficiency, and versatility in processing structured and unstructured text from diverse document formats.
@@ -134,11 +134,81 @@ Due to these characteristics, leaflets are prone to linguistic ambiguities, conv
 
 Additionally, supermarket leaflets are commonly scheduled for a weekly release, with each leaflet containing a set of deals that are valid for a specific period. However, not every supermarket chain follows this pattern, and some may release leaflets bi-weekly, monthly or even irregularly. This temporal grounding problem requires associating each deal with an expiry time, which is often implicit in the leaflet text. For instance, a deal may be valid only in specific store branches or for a limited time, indicated by small print codes or context clues.
 
-This multifaceted nature demands architectures that jointly optimize for visual-textual alignment, error-resilient parsing, and contextual plausibility. 
+This multifaceted nature demands architectures that jointly optimize for visual-textual alignment, error-resilient parsing, and contextual plausibility.
+
 \section{Deal Detection}
-    \subsection{Datasets}
-    \subsection{Model}
-    \subsection{Experiments}
+Detecting deals within supermarket leaflets is a crucial step in the process of extracting structured  data. The ultimate end-to-end goal of deal detection is to accurately identify and separate individual deals from digital supermarket leaflets, enabling further analysis and integration into a structured database for an application. This step is fundamental for creating a comprehensive, queryable system that allows users to compare deals across different retailers efficiently. Directly detecting deals within leaflets is necessary because supermarket deals are not standardized, and each leaflet can contain multiple overlapping deals, diverse layouts, and varying fonts, making simple text-based extraction approaches insufficient.
+
+\subsection{Dataset}
+An approach to obtaining deal data would be direct web scraping from supermarket websites, as these days they present their deals digitally in a structured way. However, this method is highly error-prone and difficult to generalize due to the distinct and frequently changing layouts of different supermarket websites. Additionally, many retailers do not provide direct, easily scrappable structured deal data. Instead, an alternative source has been identified. Websites that aggregate and upload full promotional leaflets from various German supermarkets on a weekly basis. These leaflets provide a more standardized input format and can be systematically downloaded using an automated script.
+
+The collected dataset consists of approximately 13,000 images from a diverse range of supermarket chains, including well-known retailers such as Penny, Aldi, and Kaufland, as well as less conventional ones like Metro. The primary focus remains on supermarkets that sell groceries and drugstore products, as these are the most relevant for the intended applications. Each leaflet page contains multiple distinct offers, which must be individually detected. This is achieved through object detection techniques, which can either utilize bounding boxes or instance segmentation. While bounding box detection provides a straightforward way to localize deals, it often struggles with overlapping offers, leading to incorrect classifications. Instance segmentation is therefore the preferred approach, as it allows for more precise extraction of deal regions without interference from neighboring offers. Deals in the dataset are categorized into four main classes:
+
+\begin{itemize}
+    \item Standard Deal: A regular product discount.
+    \item Product Category Deal: A discount on an entire product category (e.g., "20\% off all canned goods").
+    \item Coupon Deal: Special offers requiring the use of coupons (e.g., Payback).
+    \item Miscellaneous: Deals outside the primary categories, such as travel promotions.
+\end{itemize}
+
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/deal_detection/dataset_count.png}
+    \caption{Distribution of labeled leaflet pages and deals in training and validation sets.}
+    \label{fig:ddetect_dataset_count}
+\end{figure*}
+
+The primary focus is on standard deals, as they are the most common and directly useful for consumers. No publicly available dataset fully aligns with this task as it involves both instance segmentation and deal categorization, specifically in the context of German supermarkets. So, a subset of the collected pages was manually annotated. The result is a dataset of 672 annotated leaflet pages, with 4,675 individual deals in training and 75 pages with 523 deals in the validation set as shown in \figref{fig:ddetect_dataset_count}. In cases where no overlapping elements were present, bounding boxes were used. For overlapping offers, instance segmentation masks were created. Depending on the training requirements, annotations can be converted between bounding boxes and segmentation masks, although segmentation masks provide a more granular representation.
+
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/deal_detection/bbox_page.png}
+    \caption{Bounding box detection results on a leaflet page resulting in overlapping bounding boxes.}
+    \label{fig:ddetect_bbox_page}
+\end{figure*}
+
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/deal_detection/mask_page.png}
+    \caption{Instance segmentation results on a leaflet page showing precise deal separation.}
+    \label{fig:ddetect_mask_page}
+\end{figure*}
+
+\subsection{Model}
+Object detection and segmentation tasks require identifying objects within an image while determining their locations. The simplest form of image analysis, image classification, assigns a single label to an entire image, providing no information about object positions. However, multiple deal detection in supermarket leaflets demands the identification of multiple deals, whose number is unknown beforehand, along with their precise locations to extract them later.
+
+Object detection models can be broadly categorized into multi-stage (multi-shot) detectors and single-stage (single-shot) detectors. Multi-stage detectors, such as the R-CNN family (R-CNN, Fast R-CNN, Faster R-CNN, Mask R-CNN), follow a sequential process. First, they generate a set of region proposals, indicating potential object locations. These proposals are then classified in a second stage. While this method achieves high accuracy, it introduces significant computational overhead. Earlier versions, such as R-CNN, even relied on separate, non-learnable algorithms for proposal generation. Faster R-CNN improved efficiency by integrating the Region Proposal Network (RPN) directly into the model, eliminating the need for external proposal algorithms. However, even this approach remains computationally demanding. In contrast, single-stage detectors, such as YOLO (You Only Look Once), perform detection in a single forward pass, predicting object locations and classifications simultaneously. This significantly reduces inference time, making these models well-suited for real-time applications. YOLO, in particular, has established itself as one of the most widely used architectures due to its speed and competitive accuracy. Given the requirement of processing thousands of leaflet pages efficiently, a single-stage detector was chosen for deal detection, with a particular focus on YOLO-based architectures.
+
+The YOLO model follows a grid-based detection approach, where the input image is divided into an SxS grid. Each grid cell is processed for predicting objects whose centers fall within it. Instead of relying on separate region proposal mechanisms, YOLO processes the image in a single forward pass, directly predicting bounding box coordinates, confidence scores, and class probabilities per grid cell. The bounding boxes are parameterized by their center coordinates, width, and height, while the confidence scores indicate the model’s certainty that a given bounding box contains an object. The class probabilities further specify which category the detected object belongs to. Traditional object detection frameworks like YOLO produce bounding boxes that encapsulate detected objects in rectangular shapes. However, supermarket leaflets contain deals that frequently overlap or feature irregular layouts, making bounding box-based detection less effective. Instance segmentation extends YOLO by incorporating an additional segmentation head that predicts pixel-level masks for each detected object. This approach enables the model to distinguish individual deals more precisely, reducing the risk of grouping multiple offers within a single bounding box. The segmentation mechanism operates by first detecting objects using the standard YOLO pipeline. Once a bounding box is identified, the model refines its prediction by generating a binary mask that determines which pixels within the bounding box belong to the detected object. The segmentation head shares feature representations with the object detection components, ensuring efficient training and inference. This method enhances the model’s ability to isolate individual deals even in cluttered layouts, making it particularly suited for supermarket leaflets where offers frequently overlap or appear with complex backgrounds.
+
+\subsection{Experiments}
+Evaluating the performance of instance segmentation models requires an analysis of how well detected objects align with ground-truth annotations. The primary metric used in this assessment is **Mean Average Precision (mAP)**, which quantifies detection accuracy at different levels of overlap between predicted and actual objects. The core component of mAP is Intersection over Union (IoU). IoU is defined as the ratio of the intersection area between the predicted and ground-truth segmentation masks to their union. A higher IoU indicates a better match between the prediction and the actual object, while a lower IoU suggests that the detected region is misaligned or includes excessive background. In the case of bounding boxes, IoU is calculated based on the overlap of rectangular regions, whereas for instance segmentation, it is computed on a pixel level, capturing the true shape of the detected objects. To evaluate model performance, different IoU thresholds are applied. A commonly used metric is mAP@50, which considers a detection correct if the IoU between the predicted and ground-truth mask exceeds 50\%. This threshold provides insight into how well a model identifies objects in general but does not strictly enforce precision in localization. A more comprehensive metric is mAP@50-95, which averages precision across multiple IoU thresholds, ranging from 50\% to 95\% in increments of 5\%. This approach penalizes models that fail to produce accurate segmentations and is particularly useful for assessing how well the model distinguishes closely packed or irregularly shaped deals.
+
+\begin{figure*}[h!]
+    \centering
+    \begin{tabular}{cc}
+    \includegraphics[width=0.5\linewidth]{figures/deal_detection/map50_all_yolo.png} &   \includegraphics[width=0.5\linewidth]{figures/deal_detection/map50_95_all_yolo.png} \\
+    (a) Results for mAP50 & (b) Results for mAP50-95 \\[2pt]
+    \end{tabular}
+    \caption{Performance comparison of YOLOv8 and YOLOv11 models on the deal detection validation set.}
+    \label{fig:all_yolo_results}
+\end{figure*}
+
+The first set of experiments focused on comparing different YOLO variants trained on the dataset. Each model was trained for 20 epochs without additional data augmentation. The results, shown in Figure \ref{fig:all_yolo_results} (a), present the mAP50 (mask) scores for YOLOv8 and YOLOv11 in their small, medium, and large configurations. The findings indicate that the smallest version of YOLOv8 achieved the highest validation mAP50, outperforming larger models in this setting. A second analysis, visualized in Figure \ref{fig:all_yolo_results} (b), examines mAP50-95 scores for the same models, reinforcing the observation that a lightweight YOLO model is sufficient for this particular task. The lower performance of larger models suggests that the dataset’s structure, with relatively uniform layouts, does not require highly complex architectures to achieve strong results.
+
+\begin{figure*}[h!]
+    \centering
+    \begin{tabular}{cc}
+    \includegraphics[width=0.5\linewidth]{figures/deal_detection/map50_yolo8.png} &   \includegraphics[width=0.5\linewidth]{figures/deal_detection/map50_95_yolo8.png} \\
+    (a) Results for mAP50 & (b) Results for mAP50-95 \\[2pt]
+    \end{tabular}
+    \caption{Performance comparison of YOLOv8s models with and without data augmentation on the deal detection validation set.}
+    \label{fig:yolo8_results}
+\end{figure*}
+
+Following this baseline evaluation, additional experiments investigated the impact of data augmentation on segmentation performance. Various augmentation strategies were applied, including translation, scaling, horizontal flipping, and color transformations. The goal was to determine whether these transformations improved the model’s ability to generalize across different leaflet layouts. Each augmented model was trained for ten additional epochs, and the results are displayed in Figure \ref{fig:yolo8_results}. While certain augmentation techniques led to slight improvements in segmentation accuracy, particularly for models trained with random translations, the overall best-performing model remained the one trained without any augmentation. This outcome suggests that the dataset already contains sufficient variation to ensure robust generalization without the need for extensive artificial augmentations.
+
+The final model selection was based on the combination of high segmentation accuracy and computational efficiency. Given the results, YOLOv8s was chosen as the preferred model, as it consistently outperformed more complex variants while maintaining a lower computational cost. The model’s ability to detect deals with high precision makes it a strong candidate for further applications. And this is particularly important because everything else builds on it.
 
 \section{Information Extraction of Supermarket Deals}
 Subsequently to the detection and separation of supermarket deals, the overarching goal of using these in applications requires the extraction of the various useful information from these deals. 
@@ -443,16 +513,39 @@ Normalization significantly improved results, as shown in \figref{fig:eval_final
 In contrast, the OCR+LLM pipeline proved considerably weaker than both LVLMs and Donut. This performance gap stems from several factors: (1) the lack of spatial and visual information, which limits its ability to resolve ambiguities; (2) error propagation from the OCR stage to the LLM, compounding inaccuracies; and (3) insufficient training data to achieve robust IE performance. Despite these limitations, OCR+LLM remains a viable option for scenarios with constrained computational resources and moderate task complexity, where its simplicity and lower resource demands may outweigh its performance drawbacks.
 
 
-
 \section{Application}
+The ability to detect deals from a wide range of supermarket leaflets provides the foundation for extracting structured information and building a centralized deal database. If all components, from deal detection to information extraction, function reliably, this enables the creation of a comprehensive repository containing deals from various supermarkets, based solely on the content of their weekly unstructured leaflets. Such a structured database allows for numerous applications, including price trend analysis, intelligent shopping list generation and deal comparison across stores. The immediate objective of this project was to develop a system that could automatically collect, process and present extracted deals in a structured manner. The resulting application is designed to scrape supermarket leaflets weekly, detect deals using the trained YOLO-based model and extract relevant metadata, including product names and prices. These extracted deals are then stored in a structured format within a database and made accessible through a web-based interface.
 
 \subsection{Database}
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/application/db_uml.png}
+    \caption{Database schema for storing metadata for supermarket leaflets and extracted deals.}
+    \label{fig:application_db_uml}
+\end{figure*}
+For storing the extracted deals, a lightweight and efficient solution was required. SQLite was chosen due to its simplicity and fast performance, making it well-suited for handling the structured but relatively small-scale dataset. After several weeks of scraping supermarket leaflets, the dataset grew to include 540 leaflets from 20 different supermarkets. The database is structured into three primary tables (cf. Figure \ref{fig:application_db_uml}): one for supermarket metadata, one for storing the leaflets and one containing the extracted deals. The total number of extracted deals in the database adds up to 47,829. Among these, the vast majority (46,869) are classified as standard deals, while 607 fall under product category deals, 144 correspond to coupons and 208 belong to miscellaneous categories. Since the structure and content of non-standard deals often differ significantly from regular deals featuring loyalty points, bulk discounts, or percentage-based reductions across entire product groups, the primary focus remains on standard deals. By structuring the data efficiently, the database serves as a robust backend for the subsequent web application, facilitating fast queries and scalable deal retrieval.
 
+\subsection{Web User Interface}
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/application/deals_overview.png}
+    \caption{Web-based application interface for browsing all extracted supermarket deals with search and filter functionality.}
+    \label{fig:application_web_overview}
+\end{figure*}
 
+Building on the database, a web-based application was developed to provide users with an interactive way to explore supermarket deals, which is shown in Figure \ref{fig:application_web_overview}. The core functionality centers around an intuitive search system that allows users to find deals based on specific product names. Additionally the interface supports filtering options, enabling users to refine searches by supermarket chain or deal validity period. Each deal is displayed with its corresponding image snippet, extracted metadata, and pricing information, making it easy to compare offers across different retailers.
 
-\section{Application}
-    \section{Database}
-    \section{Front End / Webapp}
+\begin{figure*}[h!]
+    \centering
+    \begin{tabular}{cc}
+    \includegraphics[width=0.45\linewidth]{figures/application/leaflet_segmentations.png} &   \includegraphics[width=0.45\linewidth]{figures/application/single_deal.png} \\
+    (a) Interactive leaflet segmentation & (b) Detailed view of a single deal \\[2pt]
+    \end{tabular}
+    \caption{Additional features of the web application, including interactive uploading of pdf leaflets and detailed deal views by clicking on individual deals.}
+    \label{fig:application_combined}
+\end{figure*}
+
+Beyond static deal browsing, the application also incorporates an upload feature that enables users to submit entire supermarket leaflets for processing. When a leaflet is uploaded, the system applies the full processing pipeline, from deal detection using YOLO to information extraction. The processed leaflet can then be browsed interactively, displaying detected deals with their segmentation masks overlaid on the original pages. This feature provides direct insights into the model’s performance, allowing users to verify the accuracy of detected promotions and extracted information. The efficiency of the application benefits from YOLO’s lightweight architecture, ensuring that leaflet processing remains fast and responsive. After a short processing time, users can navigate through detected deals and inspect the segmentation masks applied to the leaflet images. Clicking on an individual deal reveals extracted details such as the product name, price, and other metadata. The combination of automated deal extraction and interactive visualization makes the web application a practical tool for structured deal exploration and comparison.
 
 \section{Conclusion}
     \subsection{Summary}
