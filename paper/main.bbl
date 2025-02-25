@@ -1,0 +1,177 @@
+\begin{thebibliography}{10}
+
+\bibitem{easyocr}
+
+
+\bibitem{doctr}
+
+
+\bibitem{appalaraju2021}
+Srikar Appalaraju, Bhavan Jasani, Bhargava~Urala Kota, Yusheng Xie, and
+  R.~Manmatha.
+\newblock Docformer: End-to-end transformer for document understanding, 2021.
+
+\bibitem{arroyo2020}
+Roberto Arroyo, David Jiménez-Cabello, and Javier Martínez-Cebrián.
+\newblock Multi-label classification of promotions in digital leaflets using
+  textual and visual information, 2020.
+
+\bibitem{brown2020}
+Tom~B. Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared Kaplan,
+  Prafulla Dhariwal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda
+  Askell, Sandhini Agarwal, Ariel Herbert-Voss, Gretchen Krueger, Tom Henighan,
+  Rewon Child, Aditya Ramesh, Daniel~M. Ziegler, Jeffrey Wu, Clemens Winter,
+  Christopher Hesse, Mark Chen, Eric Sigler, Mateusz Litwin, Scott Gray,
+  Benjamin Chess, Jack Clark, Christopher Berner, Sam McCandlish, Alec Radford,
+  Ilya Sutskever, and Dario Amodei.
+\newblock Language models are few-shot learners, 2020.
+
+\bibitem{dai2023}
+Wenliang Dai, Junnan Li, Dongxu Li, Anthony Meng~Huat Tiong, Junqi Zhao,
+  Weisheng Wang, Boyang Li, Pascale Fung, and Steven Hoi.
+\newblock Instructblip: Towards general-purpose vision-language models with
+  instruction tuning, 2023.
+
+\bibitem{dosovitskiy2021}
+Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn,
+  Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg
+  Heigold, Sylvain Gelly, Jakob Uszkoreit, and Neil Houlsby.
+\newblock An image is worth 16x16 words: Transformers for image recognition at
+  scale, 2021.
+
+\bibitem{ppocrv2}
+Yuning Du, Chenxia Li, Ruoyu Guo, Cheng Cui, Weiwei Liu, Jun Zhou, Bin Lu,
+  Yehua Yang, Qiwen Liu, Xiaoguang Hu, Dianhai Yu, and Yanjun Ma.
+\newblock Pp-ocrv2: Bag of tricks for ultra lightweight ocr system, 2021.
+
+\bibitem{kim2022}
+Geewook Kim, Teakgyu Hong, Moonbin Yim, Jeongyeon Nam, Jinyoung Park, Jinyeong
+  Yim, Wonseok Hwang, Sangdoo Yun, Dongyoon Han, and Seunghyun Park.
+\newblock Ocr-free document understanding transformer, 2022.
+
+\bibitem{li2022}
+Minghao Li, Tengchao Lv, Jingye Chen, Lei Cui, Yijuan Lu, Dinei Florencio, Cha
+  Zhang, Zhoujun Li, and Furu Wei.
+\newblock Trocr: Transformer-based optical character recognition with
+  pre-trained models, 2022.
+
+\bibitem{li2021}
+Yulin Li, Yuxi Qian, Yuchen Yu, Xiameng Qin, Chengquan Zhang, Yan Liu, Kun Yao,
+  Junyu Han, Jingtuo Liu, and Errui Ding.
+\newblock Structext: Structured text understanding with multi-modal
+  transformers, 2021.
+
+\bibitem{li2024}
+Zhang Li, Biao Yang, Qiang Liu, Zhiyin Ma, Shuo Zhang, Jingxu Yang, Yabo Sun,
+  Yuliang Liu, and Xiang Bai.
+\newblock Monkey: Image resolution and text label are important things for
+  large multi-modal models, 2024.
+
+\bibitem{liao2019}
+Minghui Liao, Zhaoyi Wan, Cong Yao, Kai Chen, and Xiang Bai.
+\newblock Real-time scene text detection with differentiable binarization.
+\newblock (arXiv:1911.08947), December 2019.
+\newblock arXiv:1911.08947 [cs].
+
+\bibitem{liao2022}
+Minghui Liao, Zhisheng Zou, Zhaoyi Wan, Cong Yao, and Xiang Bai.
+\newblock Real-time scene text detection with differentiable binarization and
+  adaptive scale fusion, 2022.
+
+\bibitem{nandkumar2024}
+Chandran Nandkumar and Luka Peternel.
+\newblock Enhancing supermarket robot interaction: A multi-level llm
+  conversational interface for handling diverse customer intents, 2024.
+
+\bibitem{peng2022}
+Qiming Peng, Yinxu Pan, Wenjin Wang, Bin Luo, Zhenyu Zhang, Zhengjie Huang,
+  Teng Hu, Weichong Yin, Yongfeng Chen, Yin Zhang, Shikun Feng, Yu~Sun, Hao
+  Tian, Hua Wu, and Haifeng Wang.
+\newblock Ernie-layout: Layout knowledge enhanced pre-training for
+  visually-rich document understanding, 2022.
+
+\bibitem{pham2022}
+Luan Pham, Phu~Hao Hoang, Xuan~Toan Mai, and Tuan~Anh Tran.
+\newblock Adaptive radial projection on fourier magnitude spectrum for document
+  image skew estimation.
+\newblock In {\em 2022 IEEE International Conference on Image Processing
+  (ICIP)}, pages 1061--1065, 2022.
+
+\bibitem{qwen2025}
+Qwen, :, An~Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo~Zheng, Bowen Yu,
+  Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, Huan Lin, Jian Yang,
+  Jianhong Tu, Jianwei Zhang, Jianxin Yang, Jiaxi Yang, Jingren Zhou, Junyang
+  Lin, Kai Dang, Keming Lu, Keqin Bao, Kexin Yang, Le~Yu, Mei Li, Mingfeng Xue,
+  Pei Zhang, Qin Zhu, Rui Men, Runji Lin, Tianhao Li, Tianyi Tang, Tingyu Xia,
+  Xingzhang Ren, Xuancheng Ren, Yang Fan, Yang Su, Yichang Zhang, Yu~Wan,
+  Yuqiong Liu, Zeyu Cui, Zhenru Zhang, and Zihan Qiu.
+\newblock Qwen2.5 technical report, 2025.
+
+\bibitem{shi2015}
+Baoguang Shi, Xiang Bai, and Cong Yao.
+\newblock An end-to-end trainable neural network for image-based sequence
+  recognition and its application to scene text recognition, 2015.
+
+\bibitem{shi2019}
+Baoguang Shi, Mingkun Yang, Xinggang Wang, Pengyuan Lyu, Cong Yao, and Xiang
+  Bai.
+\newblock Aster: An attentional scene text recognizer with flexible
+  rectification.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  41(9):2035--2048, 2019.
+
+\bibitem{tesseract}
+R.~Smith.
+\newblock An overview of the tesseract ocr engine.
+\newblock In {\em Ninth International Conference on Document Analysis and
+  Recognition (ICDAR 2007)}, volume~2, pages 629--633, 2007.
+
+\bibitem{touvron2023}
+Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne
+  Lachaux, Timothée Lacroix, Baptiste Rozière, Naman Goyal, Eric Hambro,
+  Faisal Azhar, Aurelien Rodriguez, Armand Joulin, Edouard Grave, and Guillaume
+  Lample.
+\newblock Llama: Open and efficient foundation language models, 2023.
+
+\bibitem{vaswani2017}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N. Gomez, Lukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need, 2023.
+
+\bibitem{wei2024}
+Haoran Wei, Chenglong Liu, Jinyue Chen, Jia Wang, Lingyu Kong, Yanming Xu,
+  Zheng Ge, Liang Zhao, Jianjian Sun, Yuang Peng, Chunrui Han, and Xiangyu
+  Zhang.
+\newblock General ocr theory: Towards ocr-2.0 via a unified end-to-end model,
+  2024.
+
+\bibitem{yao2024}
+Yuan Yao, Tianyu Yu, Ao~Zhang, Chongyi Wang, Junbo Cui, Hongji Zhu, Tianchi
+  Cai, Haoyu Li, Weilin Zhao, Zhihui He, Qianyu Chen, Huarong Zhou, Zhensheng
+  Zou, Haoye Zhang, Shengding Hu, Zhi Zheng, Jie Zhou, Jie Cai, Xu~Han, Guoyang
+  Zeng, Dahai Li, Zhiyuan Liu, and Maosong Sun.
+\newblock Minicpm-v: A gpt-4v level mllm on your phone, 2024.
+
+\bibitem{yenduri2023}
+Gokul Yenduri, Ramalingam M, Chemmalar~Selvi G, Supriya Y, Gautam Srivastava,
+  Praveen Kumar~Reddy Maddikunta, Deepti~Raj G, Rutvij~H Jhaveri, Prabadevi B,
+  Weizheng Wang, Athanasios~V. Vasilakos, and Thippa~Reddy Gadekallu.
+\newblock Generative pre-trained transformer: A comprehensive review on
+  enabling technologies, potential applications, emerging challenges, and
+  future directions, 2023.
+
+\bibitem{zhang2024}
+Jian Zhang, Runwei Ding, Miaoju Ban, and Linhui Dai.
+\newblock Pku-goodsad: A supermarket goods dataset for unsupervised anomaly
+  detection and segmentation.
+\newblock {\em IEEE Robotics and Automation Letters}, 9(3):2008–2015, March
+  2024.
+
+\bibitem{zhao2018}
+Guoping Zhao, Jiajun Liu, Jiacheng Jiang, Hua Guan, and Ji-Rong Wen.
+\newblock Skip-connected deep convolutional autoencoder for restoration of
+  document images.
+\newblock In {\em 2018 24th International Conference on Pattern Recognition
+  (ICPR)}, pages 2935--2940, 2018.
+
+\end{thebibliography}

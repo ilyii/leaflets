@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: plain.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--to sort, need author or key in easyocr
+Warning--to sort, need author or key in doctr
+Warning--empty journal in liao2019
+Warning--there's a number but no volume in liao2019
+You've used 28 entries,
+            2118 wiz_defined-function locations,
+            605 strings with 11036 characters,
+and the built_in function-call counts, 14178 in all, are:
+= -- 1094
+> -- 1444
+< -- 4
++ -- 577
+- -- 546
+* -- 1273
+:= -- 2467
+add.period$ -- 61
+call.type$ -- 28
+change.case$ -- 355
+chr.to.int$ -- 0
+cite$ -- 32
+duplicate$ -- 259
+empty$ -- 694
+format.name$ -- 546
+if$ -- 2707
+int.to.chr$ -- 0
+int.to.str$ -- 28
+missing$ -- 6
+newline$ -- 120
+num.names$ -- 52
+pop$ -- 471
+preamble$ -- 1
+purify$ -- 329
+quote$ -- 0
+skip$ -- 271
+stack$ -- 0
+substring$ -- 303
+swap$ -- 62
+text.length$ -- 4
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 112
+warning$ -- 4
+while$ -- 60
+width$ -- 30
+write$ -- 238
+(There were 4 warnings)
