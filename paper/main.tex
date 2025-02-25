@@ -60,9 +60,9 @@ Supermarket leaflets are a valuable source of information for consumers, offerin
 
 \subsection{Motivation}
 When one thinks of a paper-heavy country, Germany is likely to come to mind. The country's affinity for printed materials is deeply ingrained in its culture, with activities such as browsing through supermarket leaflets serving as a familiar ritual for many individuals. These leaflets have long been an essential medium for consumers to plan their purchases, discover special offers, and compare prices.
-The rapid advancement of digital technology is transforming consumer behavior. While some individuals still find browsing through physical leaflets a nostalgic and even relaxing experience, younger generations are increasingly turning to digital alternatives for their shopping needs. The modern shopper expects convenience, efficiency, and instant access to information, yet the digital transformation of supermarket leaflets in Germany lags significantly behind, even despite the existence of applications that centralize digital versions of these leaflets. The majority of these applications' digital leaflets are plain documents, failing to leverage the full potential of interactivity, searchability, and intelligent recommendation systems. 
+The rapid advancement of digital technology is transforming consumer behavior. While some individuals still find browsing through physical leaflets a nostalgic and even relaxing experience, younger generations are increasingly turning to digital alternatives for their shopping needs. The modern shopper expects convenience, efficiency, and instant access to information, yet the digital transformation of supermarket leaflets in Germany lags significantly behind, even despite the existence of applications that centralize digital versions of these leaflets. The majority of these digital leaflets are plain documents, failing to leverage the full potential of interactivity, searchability and intelligent recommendation systems. 
 
-Furthermore, while price comparison websites and applications have become commonplace for electronics, fashion, and travel, the grocery sector remains an overlooked frontier. Consumers are often left navigating multiple supermarket websites or manually cross-referencing prices to find the best deals—a tedious and inefficient process. A comprehensive digital ecosystem that integrates grocery price comparisons, personalized discounts, and AI-driven shopping assistants could bridge this gap and act as a workaround, offering an enhanced, data-driven shopping experience and a tool that allows consumers to create a dynamic shopping list, track price trends over time, and receive real-time updates on the best deals.
+Furthermore, while price comparison websites and applications have become commonplace for electronics, fashion and travel, the grocery sector remains an overlooked frontier. Consumers are often left navigating multiple supermarket websites or manually cross-referencing prices to find the best deals. This is often a tedious and inefficient process. A comprehensive digital ecosystem that integrates grocery price comparisons, personalized discounts and AI-driven shopping assistants could bridge this gap and act as a workaround, offering an enhanced, data-driven shopping experience and a tool that allows consumers to create a dynamic shopping list, track price trends over time, and receive real-time updates on the best deals.
 
 \subsection{Problem Statement}
 The primary objective of this research is to develop an intelligent system for extracting, structuring, and utilizing information from supermarket leaflets in a digital format. Given a set of supermarket leaflets $\mathbf{L} = \{L_1, L_2, ..., L_n\}$, where each $L_i$ contains a set ofproduct deals $\{p_j\}_{j=1}^{m} \in P_{L_i}$, the goal is to extract and normalize these attributes to enable efficient querying and comparison across multiple supermarket chains.
@@ -71,10 +71,13 @@ Each product deal $p_j$ is represented by a set of attributes $\{y_1, y_2, ..., 
 
 To enable advanced applications such as the abovementioned, one has to tackle different challenges, such as:
 \begin{enumerate}
+    \item Gathering a diverse set of supermarket leaflets from various retailers.
     \item Detecting and separating deals $p$ from the leaflet $L$.
     \item Extracting structured information from the detected deals.
     \item Normalizing the extracted information to ensure consistency and comparability.
     \item Validating the extracted information to ensure accuracy.
+    \item Storing the extracted information in a structured format for efficient querying and comparison.
+    \item Developing an interactive application for browsing and comparing deals across multiple supermarket chains.
 \end{enumerate}
 
 Therefore, a function $f: \mathcal{L} \to \mathcal{D}$ has to be designed, that maps a set of leaflets $\mathcal{L}$ to a set of structured deals $\mathcal{D}$, where each deal $d \in \mathcal{D}$ is represented by a set of attributes $\{y_1, y_2, ..., y_k\}$.
@@ -90,7 +93,7 @@ To build this mapping, this work presents the conducted research and the practic
     \label{fig:overview}
 \end{figure*}
 
-To enhance usability, an \emph{interactive application} is developed that allows consumers to browse, filter, and compare deals across multiple supermarket chains. It provides essential search, tracking, and comparison features for improved deal discovery.
+To enhance usability, an \emph{interactive application} is developed that allows consumers to browse, filter, and compare deals across multiple supermarket chains. In addition, a feature allows an entire leaflet to be uploaded and the entire pipeline to be run in order to examine the deals in detail. This application serves as a proof of concept for the proposed system and demonstrates its practical utility.
 
 To facilitate research and development in this domain, \emph{Leaflet-IE}, an end-to-end benchmark dataset for information extraction from supermarket leaflets, is introduced. This dataset stands as a valuable resource for evaluating and comparing different models and approaches in the field.
 
@@ -105,7 +108,8 @@ This work is structured to systematically address supermarket deal detection and
 The field of supermarket leaflet analysis has evolved to tackle key challenges such as product classification, promotion identification, and customer interaction. Recent studies have leveraged AI-driven techniques to enhance efficiency and accuracy in this domain. For instance, cite{ladwig2023} explore fine-grained product classification in leaflet advertisements, while \cite{arroyo2020} employ multi-label classification methods to analyze promotions using both textual and visual information. Additionally, Zhang et al. \cite{zhang2024} introduce PKU-GoodsAD, a dataset designed for unsupervised anomaly detection and segmentation of supermarket goods. Complementing these efforts,\cite{nandkumar2024} propose a multi-level Large Language Model (LLM) conversational interface to enhance supermarket robot interactions by handling diverse customer intents.
 
 \indent{\textbf{Deal Detection}.}
-There are no direct approaches for detecting deals, including product image, price, name and more, in supermarket leaflets. However, the detection of specific elements in documents, or more generally, the detection of objects in images, is a widely researched area. When it comes to just the actual detection of these elements without understanding the semantic meaning, models such as YOLO or Faster R-CNN prove to be effective. These models are able to recognize objects in images and mark them with bounding boxes and further classify them. But because there is no direct research on the detection of deals in supermarket leaflets, the research has to be done in this area.
+There are no direct approaches for detecting deals, including product image, price, name and more, in supermarket leaflets. However, the detection of specific elements in documents, or more generally, the detection of objects in images, is a widely researched area. When it comes to just the actual detection of these elements without understanding the semantic meaning, models such as YOLO or Faster R-CNN prove to be effective. These models are able to recognize objects in images and mark them with bounding boxes and further classify them. 
+% TODO: Add more advanced methods for object/instant segmentation
 
 \indent{\textbf{Information Extraction}.}
 Recent advancements in OCR, LLMs, and end-to-end multimodal architectures have significantly refined the landscape of document information extraction. These improvements have led to increased accuracy, efficiency, and versatility in processing structured and unstructured text from diverse document formats.
@@ -120,7 +124,7 @@ The integration of large vision-language models (LVLMs) has further expanded the
 \label{sec:leaflets_data}
 Supermarket leaflets constitute a complex multimodal data domain characterized by heterogeneous layouts, ambiguous associations, and noisy signal extraction. As illustrated in \figref{fig:leaflet_data_samples}, these documents present unique computational challenges that demand joint reasoning over visual, textual, and contextual modalities. We formalize the key obstacles below.
 
-Leaflets exhibit extreme variability in design elements that impede automated parsing. The spatial heterogeneity, thus the non-standardized arrangements of product images, prices, and promotions across retailers, is a primary concern. The layout of leaflets can vary significantly, with product images, prices, and promotional text appearing in diverse configurations. Additionally, typography challenges, such as superscripted decimals, struck-through original prices, and font inconsistencies between deals and regular text, further complicate the extraction process. Overlapping elements, where text is occluded by product images or graphical overlays, violate the assumptions of Optical Character Recognition (OCR) systems, which assume planar text.
+Leaflets exhibit extreme variability in design elements that impede automated parsing. The spatial heterogeneity, thus the non-standardized arrangements of product images, prices, and promotions across retailers, is a primary concern. The layout of leaflets can vary significantly, with product images, prices, and promotional text appearing in diverse configurations. Additionally, typography challenges, such as superscripted decimals, struck-through original prices, and font inconsistencies between deals and regular text, further complicate the extraction process. Overlapping elements, where text is occluded by product images or graphical overlays, violate the assumptions of OCR systems, which assume planar text.
 
 \begin{figure}[h!]
     \centering
@@ -139,12 +143,13 @@ This multifaceted nature demands architectures that jointly optimize for visual-
 
 \section{Deal Detection}
 \label{sec:deal_detection}
-Detecting deals within supermarket leaflets is a crucial step in the process of extracting structured  data. The ultimate end-to-end goal of deal detection is to accurately identify and separate individual deals from digital supermarket leaflets, enabling further analysis and integration into a structured database for an application. This step is fundamental for creating a comprehensive, queryable system that allows users to compare deals across different retailers efficiently. Directly detecting deals within leaflets is necessary because supermarket deals are not standardized, and each leaflet can contain multiple overlapping deals, diverse layouts, and varying fonts, making simple text-based extraction approaches insufficient.
+Detecting deals within supermarket leaflets is a crucial step in the process of extracting structured data. The ultimate end-to-end goal of deal detection is to accurately identify and separate individual deals from digital supermarket leaflets, enabling further analysis and integration into a structured database for an application. This step is fundamental for creating a comprehensive, queryable system that allows users to compare deals across different retailers efficiently. Directly detecting deals within leaflets is necessary because supermarket deals are not standardized, and each leaflet can contain multiple overlapping deals, diverse layouts, and varying fonts, making simple text-based extraction approaches insufficient.
 
 \subsection{Dataset}
 An approach to obtaining deal data would be direct web scraping from supermarket websites, as these days they present their deals digitally in a structured way. However, this method is highly error-prone and difficult to generalize due to the distinct and frequently changing layouts of different supermarket websites. Additionally, many retailers do not provide direct, easily scrappable structured deal data. Instead, an alternative source has been identified. Websites that aggregate and upload full promotional leaflets from various German supermarkets on a weekly basis. These leaflets provide a more standardized input format and can be systematically downloaded using an automated script.
+% TODO: add url source 
 
-The collected dataset consists of approximately 13,000 images from a diverse range of supermarket chains, including well-known retailers such as Penny, Aldi, and Kaufland, as well as less conventional ones like Metro. The primary focus remains on supermarkets that sell groceries and drugstore products, as these are the most relevant for the intended applications. Each leaflet page contains multiple distinct offers, which must be individually detected. This is achieved through object detection techniques, which can either utilize bounding boxes or instance segmentation. While bounding box detection provides a straightforward way to localize deals, it often struggles with overlapping offers, leading to incorrect classifications. Instance segmentation is therefore the preferred approach, as it allows for more precise extraction of deal regions without interference from neighboring offers. Deals in the dataset are categorized into four main classes:
+The collected dataset consists of approximately 13,000 images from a diverse range of supermarket chains, including well-known retailers such as Penny, Aldi, and Kaufland, as well as less conventional ones like Metro. The primary focus remains on supermarkets that sell groceries and drugstore products, as these are the most relevant for the intended applications. Each leaflet page contains multiple distinct deals, which must be individually detected. This is achieved through object detection techniques, which can either utilize bounding boxes or instance segmentation. While bounding box detection provides a straightforward way to localize deals, it often struggles with overlapping deals, which can lead to inaccurate information extraction and misclassification of deals later on. Instance segmentation is therefore the preferred approach, as it allows for more precise extraction of deal regions without interference from neighboring deals. Deal Objects in the dataset are categorized into four main classes:
 
 \begin{itemize}
     \item Standard Deal: A regular product discount.
@@ -161,6 +166,8 @@ The collected dataset consists of approximately 13,000 images from a diverse ran
 \end{figure*}
 
 The primary focus is on standard deals, as they are the most common and directly useful for consumers. No publicly available dataset fully aligns with this task as it involves both instance segmentation and deal categorization, specifically in the context of German supermarkets. So, a subset of the collected pages was manually annotated. The result is a dataset of 672 annotated leaflet pages, with 4,675 individual deals in training and 75 pages with 523 deals in the validation set as shown in \figref{fig:ddetect_dataset_count}. In cases where no overlapping elements were present, bounding boxes were used. For overlapping offers, instance segmentation masks were created. Depending on the training requirements, annotations can be converted between bounding boxes and segmentation masks, although segmentation masks provide a more granular representation.
+
+% TODO: Referenz auf untenstehende Figures.
 
 \begin{figure*}[h!]
     \centering
@@ -231,7 +238,7 @@ where $y_{i}$ represents the $i$-th entity in the deal image. In the following, 
     \item \code{$y_{\text{unit}}$}: The unit of the product (e.g., weight, volume).
 \end{itemize}
 
-To extract these entities, one aims to learn a function $f(\cdot)$ that maps an input image $I$ to the desired outputs:
+To extract these entities, the target is to learn a function $f(\cdot)$ that maps an input image $I$ to the desired outputs:
 \begin{equation}
     f: I \to \mathcal{Y},
 \end{equation}
@@ -242,7 +249,7 @@ The choice of the function $ f(\cdot) $ is an architectural decision that depend
 Among the various existing architectural approaches to learn $ f(\cdot) $ for information extraction, several methodologies have been developed to address the inherent complexities in supermarket deal images. These methods can be categorized into classical approaches, multi-stage traditional models, hybrid OCR-LLM systems, and end-to-end deep learning frameworks. Each paradigm offers distinct advantages, and their applicability depends on computational resources, dataset characteristics, and performance requirements.
 
 \subsubsection{Traditional and Hybrid Approaches for Supermarket Leaflet Information Extraction}  
-Information extraction from supermarket leaflets has traditionally been approached through a pipeline of sequential sub-tasks, each addressed by specialized systems. These methods, while extensively studied and methodologically diverse, are typically divided into three main stages: text detection, text recognition, and key-value pair extraction. Although effective in certain scenarios, these approaches suffer from inherent limitations, including computational overhead, error propagation, and suboptimal performance on edge cases. Recent advancements in large language models (LLMs) have led to the development of hybrid OCR-LLM architectures, which combine the precision of optical character recognition (OCR) with the contextual reasoning capabilities of LLMs. Below, we formalize these approaches and discuss their strengths and limitations.
+Information extraction from supermarket leaflets has traditionally been approached through a pipeline of sequential sub-tasks, each addressed by specialized systems. These methods, while extensively studied and methodologically diverse, are typically divided into three main stages: text detection, text recognition, and key-value pair extraction. Although effective in certain scenarios, these approaches suffer from inherent limitations, including computational overhead, error propagation, and suboptimal performance on edge cases. Recent advancements in LLMs have led to the development of hybrid OCR-LLM architectures, which combine the precision of OCR with the contextual reasoning capabilities of LLMs. Below, we formalize these approaches and discuss their strengths and limitations.
 
 Traditional architectures decompose the problem into independent sub-tasks, each handled by specialized models. While this modularity allows for targeted optimization, it introduces complexity and inefficiencies due to the lack of end-to-end training and error propagation across stages.
 
@@ -250,7 +257,7 @@ The first stage, \emph{text detection}, involves identifying regions in the imag
 
 Each detected bounding box $ b_i $ is cropped and processed by a \emph{text recognition} model to convert the visual representation into a textual one. This task is challenging due to decoding errors caused by noisy backgrounds, stylized fonts, and ambiguous characters. Given the set of bounding boxes $ \{b_i\}_{i=1}^{M} $, the goal is to predict the corresponding textual entities $ \{t_i\}_{i=1}^{M} $ as the maximum likelihood sequence.
 
-To use the recognized texts for information extraction, the final stage involves parsing the textual entities into structured outputs. This is typically achieved through rule-based systems or sequence-to-sequence models that generate key-value pairs from the recognized text. The output is a set of structured entities $ \{y_i\}_{i=1}^{N} $, where each $ y_i $ represents a specific entity (e.g., product name, price, unit).
+To use the recognized texts for information extraction, the final stage involves parsing the textual entities into structured outputs. This is typically achieved through rule-based systems or sequence-to-sequence models that generate key-value pairs from the recognized text. The output is a set of structured entities $ \{y_i\}_{i=1}^{N} $, where each $ y_i $ represents one of the desired attributes.
 
 The rise of \emph{large language models }(LLMs) has enabled the development of hybrid OCR-LLM architectures, which combine the strengths of OCR tools with the linguistic and reasoning capabilities of LLMs. These approaches retain the traditional OCR pipeline for converting visual text into machine-readable form but leverage LLMs to enhance robustness through contextual reasoning and structured output generation.
 
@@ -270,7 +277,7 @@ Foundationally, all E2E models decompose into three components: a vision encoder
     \label{fig:e2e_arch}
 \end{figure}
 
-\indent{\textbf{Donut \cite{kim2022}}.} This model employs a compact transformer-based encoder-decoder. Let $ I $ be partitioned into patches, each linearly projected to an encoded input $X$.  The used vision encoder $E$ computes an encoded representation mainly through:
+\indent{\textbf{Donut \cite{kim2022}}.} This model employs a compact transformer-based encoder-decoder. Let $ I $ be partitioned into patches, each linearly projected to an encoded input $X$. The used vision encoder $E$ computes an encoded representation mainly through:
 \begin{equation}
 Z = E(I) = \text{FFN}(\text{MSA}(X) + X) + \text{MSA}(X)
 \end{equation}  
@@ -282,33 +289,34 @@ P(y_t | y_{<t}, Z) = \text{Softmax}(\text{FFN}(\text{MSA}(Y) + Z)),
 \end{equation}  
 where $ Y $ is the token sequence and $ Z $ the encoded image features. The model is trained end-to-end with a maximum likelihood objective \cite{vaswani2017}.
 
-\indent{\textbf{Large Vision-Language Models (LVLMs)}.} In the realm of upscaling language models into LLMs, computer vision utilizes this trend to process multimodal data. LVLMs like Llama 3.2 Vision \cite{touvron2023} scale this framework by integrating pretrained vision encoders with large language models (LLMs). These architectures utilize \emph{cross-modal projection}, which aligns visual features with the LLM's embedding space, and \emph{multimodal decoding}, which attends to both visual tokens and textual prompts. The LVLM's strength lies in zero-shot reasoning and leveraging pretrained knowledge for structured output generation.
+\indent{\textbf{Large Vision-Language Models (LVLMs)}.} In the realm of upscaling language models into LLMs, computer vision utilizes this trend to process multimodal data. LVLMs like Llama 3.2 Vision \cite{touvron2023} scale this framework by integrating pretrained vision encoders with LLMs. These architectures utilize \emph{cross-modal projection}, which aligns visual features with the LLM's embedding space, and \emph{multimodal decoding}, which attends to both visual tokens and textual prompts. The LVLM's strength lies in zero-shot reasoning and leveraging pretrained knowledge for structured output generation.
 
-While smaller models like Donut offer efficiency and direct output generation, LVLMs provide zero-shot reasoning and open-world capabilities at increased computational cost. 
+While smaller models like Donut offer efficiency and direct output generation, LVLMs provide zero-shot reasoning and open-world capabilities at increased computational cost.
 
 \subsection{Dataset Creation}
 
 \begin{table}[h!]
     \centering
-    \caption{Leaflet-IE Dataset}
+    \caption{Leaflet-IE Dataset with a sum of 372 annotated deals.}
     \label{tab:ie_dataset}
     \begin{tabular}{lc}
     \toprule
     Entity           & Sample Size \\
     \midrule
-    \code{image\_id}        & 372  \\
     \code{brand}            & 357  \\
     \code{product\_name}    & 370  \\
     \code{original\_price}  & 286  \\
     \code{deal\_price}      & 372  \\
-    \code{weight}           & 369  \\
+    \code{unit}           & 369  \\
     \bottomrule
     \end{tabular}
-    \end{table}
+\end{table}
 
-Since the availability of German supermarket leaflet data is literally not findable, a custom dataset was created by manually annotating a collection of supermarket deal images. The dataset includes images from the most common supermarket chains, each with unique layout, fonts, and colors to, in general, ensure the highest diversity and robustness possible. Each image is annotated with a corresponding label file that includes the desired entities as well as the image identificator. The dataset is split into a training (\~{} 80\%) and a validation set (\~{} 20\%) for each model to be trained and evaluated on. \tabref{tab:ie_dataset} provides an overview of the dataset with the sample size for each entity and \figref{fig:ie_dataset_samples} shows some sample images with their annotations.
+Since the availability of German supermarket leaflet data is literally not findable, a custom dataset was created by manually annotating a collection of supermarket deal images. The dataset includes images from the most common supermarket chains, each with unique layout, fonts, and colors to, in general, ensure the highest diversity and robustness possible. Each image is annotated with a corresponding label file that includes the desired entities as well as the image identificator. The dataset is split into a training (\~{} 80\%) 
+and a validation set (\~{} 20\%) for each model to be trained and evaluated on. \tabref{tab:ie_dataset} provides an overview of the dataset with the sample size for each entity and \figref{fig:ie_dataset_samples} shows some sample images with their annotations.
 
-Even though the Leaflet-IE dataset is relatively small, the reader will be able to see that the dataset is sufficient to evaluate the performance of different IE appraoches as well as to train an competitive end-to-end model. However, as the reader may notice, the dataset is solely focused on single product deals at this point and explicitly does not include 
+Even though the Leaflet-IE dataset is relatively small, the reader will be able to see that the dataset is sufficient to evaluate the performance of different IE appraoches as well as to train an competitive end-to-end model. However, as the reader may notice, the dataset is solely focused on single product deals at this point and explicitly does not include
+% TODO: Missing Text (ILYI)
 
 \begin{figure*}[h!]
 \centering
@@ -319,7 +327,8 @@ Even though the Leaflet-IE dataset is relatively small, the reader will be able 
 
 \subsection{Experiments}
 
-The experiments aim to identify the most effective methodology for extracting structured information from supermarket leaflets by evaluating three candidate approaches: (1) Hybrid OCR + LLM pipelines, (2) end-to-end Vision-Encoder-Decoder models, and (3) Large Vision-Language Models (LVLMs). The evaluation is structured into four sequential phases to systematically assess performance and scalability.
+% TODO: Remove cause of ambiguity? (ILYI)
+% The experiments aim to identify the most effective methodology for extracting structured information from supermarket leaflets by evaluating three candidate approaches: (1) Hybrid OCR + LLM pipelines, (2) end-to-end Vision-Encoder-Decoder models, and (3) LVLMs. The evaluation is structured into four sequential phases to systematically assess performance and scalability.
 
 First, Plain Deal OCR Performance establishes a baseline by measuring the accuracy of standalone OCR systems in extracting textual content from leaflets, highlighting challenges such as font variability and noisy backgrounds. Second, OCR + LLM Performance evaluates the combined pipeline, where OCR outputs are processed by large language models to resolve ambiguities and extract structured information. Third, Donut Fine-Tuning Performance assesses the Vision-Encoder-Decoder model's effectiveness after fine-tuning on leaflet-specific data, focusing on its ability to handle multimodal inputs without intermediate OCR steps. Finally, the MAIN experiment conducts a comprehensive comparison of Hybrid OCR+LLM, Donut, and LVLM approaches, analyzing their accuracy, robustness, and computational efficiency in real-world leaflet data scenarios.
 
@@ -329,7 +338,8 @@ The experiments were conducted on two distinct computational workstations - stat
 
 The software stack includegraphics Python with PyTorch\footnote{\href{https://pytorch.org/}{https://pytorch.org/}} as the primary deep learning framework, HuggingFace Transformers \footnote{\href{https://huggingface.co/transformers/}{https://huggingface.co/transformers/}}
 for leveraging pre-trained models, ollama \footnote{\href{https://ollama.com/}{https://ollama.com/}}
-and lmstudio \footnote{\href{https://lmstudio.ai/}{https://lmstudio.ai/}} for large language models and large vision-language models, and OpenCV \footnote{\href{https://opencv.org/}{https://opencv.org/}} for image preprocessing and data augmentation, as well as various other libraries for data pre-and post-processing, visualization, data management and monitoring \footnote{The codebase is available at \href{https://github.com/ilyii/leaflets}{https://github.com/ilyii/leaflets}}.
+and lmstudio \footnote{\href{https://lmstudio.ai/}{https://lmstudio.ai/}} for LVLMs, and OpenCV \footnote{\href{https://opencv.org/}{https://opencv.org/}} for image preprocessing and data augmentation, as well as various other libraries for data pre-and post-processing, visualization, data management and monitoring \footnote{The codebase is available at \href{https://github.com/ilyii/leaflets}{https://github.com/ilyii/leaflets}}.
+% TODO: Remove this section or move it to the appendix or introduction because it is also relevant for deal detection chapter? (ILYI)
 
 
 % SUB-STUDIES
@@ -357,8 +367,7 @@ Given that language-specific OCR errors are common, the evaluation was conducted
     \item \textbf{Level 3:} Use-case specific replacements.
     \item \textbf{Level 4:} Punctuation and whitespace removal.
 \end{itemize}
-Each level includes the normalization steps of the previous levels. Therefore, the normalization procedure can be thought of as a gradual alignment of the OCR output to the ground truth to investigate the OCR model's robustness to different normalization levels. The reader is referred to \secref{app:ocr_normalization} for a detailed description of the normalization procedure.
-
+Each level includes the normalization steps of the previous levels. Therefore, the normalization procedure can be thought of as a gradual alignment of the OCR output to the ground truth to investigate the OCR model's robustness to different normalization levels. A detailed description of the normalization procedure can be found in \secref{app:ocr_normalization}.
 
 \indent{\textbf{Results}.} Figure \ref{fig:eval_ocr_accuracies} presents a comparative analysis of various OCR models and normalization levels based on per-entity accuracy. The results highlight several key trends regarding the recognition performance of different entities.
 
@@ -404,7 +413,7 @@ At the highest normalization level, most models achieve 100\% or close to 100\% 
 % EXPERIMENT: OCR+LLM
 \subsubsection{Hybrid-OCR+LLM Performance}
 
-In addition to evaluating the OCR capabilities, the performance of OCR models was assessed in conjunction with large language models (LLMs). The primary objectives were to determine the most effective OCR-LLM combination for information extraction and to evaluate the impact of different OCR models on the LLM's performance.
+In addition to evaluating the OCR capabilities, the performance of OCR models was assessed in conjunction with LLMs. The primary objectives were to determine the most effective OCR-LLM combination for information extraction and to evaluate the impact of different OCR models on the LLM's performance.
 
 All 372 samples of the Leaflet-IE dataset were used for evaluation. It is assumed that neither the OCR models nor the LLMs have previously encountered this data, similar to the OCR evaluation. Since the task is to extract structured information, the evaluation metrics were adapted to reflect the performance of the OCR-LLM combination in generating key-value mappings. The evaluation metrics include:
 \begin{itemize}
@@ -423,8 +432,7 @@ The LLMs were prompted to extract entities from the OCR output. The specific pro
 \end{itemize}
 where the LLM name and version is additionally specified through the model size (in billions of parameters) and the quantization level.
 
-
-To avoid confusion with the normalization used in the OCR experiment, the OCR results were kept raw, as normalization may remove valuable information. The LLMs are expected to handle such inconsistencies and errors in the input. Instead, here the entity values were evaluated in both raw form and with a normalization applied for the comparability between the LLM prediction and the ground truth value . The normalization procedure includes usual character replacements and filtering based on linguistic artifacts commonly encountered in OCR errors. The specific normalization procedure can be found in \secref{app:ocr_llm_normalization}.
+To avoid confusion with the normalization used in the OCR experiment, the OCR results were kept raw, as normalization may remove valuable information. The LLMs are expected to handle such inconsistencies and errors in the input. Instead, here the entity values were evaluated in both raw form and with a normalization applied for the comparability between the LLM prediction and the ground truth value. The normalization procedure includes usual character replacements and filtering based on linguistic artifacts commonly encountered in OCR errors. The specific normalization procedure can be found in \secref{app:ocr_llm_normalization}.
 \paragraph{Results:}
 The entity-averaged accuracies and Levenshtein distances for the raw OCR output are depicted in Figures \ref{fig:eval_ocr_llm_accuracies_avg} and \ref{fig:eval_ocr_llm_levdist_avg}, respectively.
 
@@ -434,7 +442,6 @@ The entity-averaged accuracies and Levenshtein distances for the raw OCR output 
     \caption{Entity-Averaged Accuracy of LLM Models per Raw OCR Output. a: Llama 3.1 [8b, Q4], b: Qwen 2.5 [1.5b, Q8], c: Llama 3.2 [3b, Q8], d: Qwen 2.5 [7b, Q4].}
     \label{fig:eval_ocr_llm_accuracies_avg}
 \end{figure*}
-
 
 The averaged accuracies reveal that a higher number of parameters is more beneficial for the LLMs in this task than a higher quantization level. Specifically, the Llama 3.1:8b and Qwen 2.5:7b models achieve significantly higher accuracy scores than their counterparts with a lower number of parameters. Qwen 2.5:1.5b in Q8 performs worse than Llama 3.2:3b in Q8, but Qwen 2.5:7b in Q4 is overall the best. These differences can be attributed to multiple factors, such as the pre-training data of the models, the model architecture, or the prompt used to extract the entities. DocTR and PaddleOCR achieve equal or better results than Tesseract and EasyOCR. Specifically, Tesseract consistently performs the worst among the evaluated models.
 
@@ -450,7 +457,7 @@ When regarding the levenshtein distances, the results show similar trends. DocTR
 \subsection{Donut Fine-Tuning Performance}
 The experiment aims to evaluate the fine-tuning performance of the Vision Encoder-Decoder model, Donut, pretrained on the CORD dataset, to determine its capability in extracting end-to-end information from supermarket leaflet deal images. Conducted on an NVIDIA RTX 4080 (Station 1), the model has a vocabulary size of 57,580 and 201M parameters. The training configuration includes 10 epochs, validation performed every epoch, gradient clipping at 2.0, 800 training samples per epoch, a learning rate of 8e-6, batch sizes of 16 for both training and validation, 400 warmup steps, and 16-bit mixed precision.
 
-\indent{\textbf{Results}.} The training and validation losses of Donut during fine-tuning are depicted in \figref{fig:donut_loss}. The training loss decreases rapidly, while the validation loss remains high, indicating overfitting. The overfitting is likely due to the limited number of leaflet layouts in the training data, which restricts the model's ability to generalize to unseen layouts. This issue is visually less pronounced, as the text is relatively consistent across leaflets, but textually, the model struggles to generalize due to the diverse language and layout variations.
+\indent{\textbf{Results}.} The training and validation losses of Donut during fine-tuning are depicted in \figref{fig:donut_loss}. The training loss decreases rapidly, while the validation loss remains high, indicating overfitting. The overfitting is likely due to the limited number of deal layouts in the training data, which restricts the model's ability to generalize to unseen layouts. This issue is visually less pronounced, as the text is relatively consistent across deals, but textually, the model struggles to generalize due to the diverse language and layout variations. Another problem is that the model is not pretrained on the German language, which may further hinder its performance.
 
 \begin{figure*}[h!]
     \begin{tabular}{cc}
@@ -464,13 +471,13 @@ The experiment aims to evaluate the fine-tuning performance of the Vision Encode
 
 \subsection{Comparison of Hybrid OCR+LLM, Donut, and LVLM}
 
-This section presents a comparative evaluation of a hybrid OCR+LLM pipeline against end-to-end models, specifically Donut and Large Vision-Language Models (LVLMs), for information extraction (IE) from supermarket leaflets. The assessment focuses on model performance using the best OCR+LLM configuration and two end-to-end approaches.
+This section presents a comparative evaluation of a hybrid OCR+LLM pipeline against end-to-end models, specifically Donut and LVLMs, for IE from supermarket deals. The assessment focuses on model performance using the best OCR+LLM configuration and two end-to-end approaches.
 
 \subsubsection{Experimental Setup}
+% TODO: Remove \subsection{Comparison of Hybrid OCR+LLM, Donut, and LVLM} because it is the same as the following? (ILYI)
+The evaluation framework was designed to compare the performance of three distinct model categories: OCR+LLM pipelines, end-to-end Vision Encoder-Decoder models, and LVLMs. For the OCR+LLM approach, DocTR served as the OCR engine, paired with Qwen 2.5-7B and LLaMA 3.1-8B as the large language models, selected for their comparable performance. The Donut model, an end-to-end Vision Encoder-Decoder architecture optimized for document understanding, was included to assess its capabilities in handling structured document data. Additionally, MiniCPM-V \cite{yao2024} and LLaMA 3.2-Vision \cite{touvron2023} were chosen as representative LVLMs to evaluate their multimodal reasoning abilities.
 
-The evaluation framework was designed to compare the performance of three distinct model categories: OCR+LLM pipelines, end-to-end Vision Encoder-Decoder models, and large vision-language models (LVLMs). For the OCR+LLM approach, DocTR served as the OCR engine, paired with Qwen 2.5-7B and LLaMA 3.1-8B as the large language models, selected for their comparable performance. The Donut model, an end-to-end Vision Encoder-Decoder architecture optimized for document understanding, was included to assess its capabilities in handling structured document data. Additionally, MiniCPM-V \cite{yao2024} and LLaMA 3.2-Vision \cite{touvron2023} were chosen as representative LVLMs to evaluate their multimodal reasoning abilities.
-
-The evaluation was conducted on the Leaflet-IE validation subset, as Donut had already been trained on the training subset, ensuring a fair comparison across models. Performance was measured using two key metrics: (1) \textbf{Accuracy}, defined as the percentage of correctly extracted entity values, and (2) \textbf{Levenshtein Distance}, which quantifies the edit distance between predicted and ground truth values at the entity level. To maintain consistency, the same normalization approach employed in the OCR+LLM evaluation was applied uniformly to both model predictions and ground truth values. This setup ensured a rigorous and standardized comparison of model performance across the selected metrics.
+The evaluation was conducted on the Leaflet-IE validation subset, ensuring a fair comparison across the models. Donut had already been fine-tuned on the training subset. The same metrics, accuracy and Levenshtein distance, were employed to assess model performance. To maintain consistency, the same normalization approach used in the OCR+LLM evaluation was applied uniformly to both model predictions and ground truth values. This setup ensured a rigorous and standardized comparison of model performance across the selected metrics.
 
 \paragraph{Per-Entity Accuracy and Levenshtein Distance}  
 The evaluation of per-entity accuracy and Levenshtein distance reveals distinct performance patterns across models, as illustrated in \figref{fig:eval_final_acc_raw} and \figref{fig:eval_final_levdis_raw}. Without normalization, the OCR+LLM pipeline performed significantly worse than Donut and LVLMs, achieving near 0\% accuracy for original and deal price entities, while LVLMs outperformed all models, particularly in price extraction, due to their ability to leverage spatial and contextual cues. Donut trailed closely but showed a notable drop in brand recognition accuracy. Levenshtein distance metrics mirrored these trends, with LVLMs and Donut exhibiting low distances, indicating high precision, while OCR+LLM struggled, especially with brand names, which consistently had the highest distances across models.  
@@ -505,7 +512,7 @@ Normalization significantly improved results, as shown in \figref{fig:eval_final
     \label{fig:eval_final_levdis_norm}
 \end{figure*}
 
-\indent{\textbf{Dicussion.}} The evaluation highlights distinct strengths and limitations across the tested models. LVLMs emerged as the most effective for information extraction (IE) tasks, particularly when spatial and visual context is critical. However, their superior performance comes at the cost of significantly higher computational requirements, making them less practical for resource-constrained environments. Donut offers a compelling trade-off between accuracy and efficiency, demonstrating strong performance despite limited training resources. With further optimization, Donut has the potential to surpass LVLMs for this specific task, though its generalization ability remains narrower compared to LVLMs, which excel across a broader range of tasks.
+\indent{\textbf{Dicussion.}} The evaluation highlights distinct strengths and limitations across the tested models. LVLMs emerged as the most effective for IE tasks, particularly when spatial and visual context is critical. However, their superior performance comes at the cost of significantly higher computational requirements, making them less practical for resource-constrained environments. Donut offers a compelling trade-off between accuracy and efficiency, demonstrating strong performance despite limited training resources. With further optimization, Donut has the potential to surpass LVLMs for this specific task, though its generalization ability remains narrower compared to LVLMs, which excel across a broader range of tasks.
 
 In contrast, the OCR+LLM pipeline proved considerably weaker than both LVLMs and Donut. This performance gap stems from several factors: (1) the lack of spatial and visual information, which limits its ability to resolve ambiguities; (2) error propagation from the OCR stage to the LLM, compounding inaccuracies; and (3) insufficient training data to achieve robust IE performance. Despite these limitations, OCR+LLM remains a viable option for scenarios with constrained computational resources and moderate task complexity, where its simplicity and lower resource demands may outweigh its performance drawbacks.
 
@@ -543,21 +550,21 @@ Building on the database, a web-based application was developed to provide users
     \label{fig:application_combined}
 \end{figure*}
 
-Beyond static deal browsing, the application also incorporates an upload feature that enables users to submit entire supermarket leaflets for processing. When a leaflet is uploaded, the system applies the full processing pipeline, from deal detection using YOLO to information extraction. The processed leaflet can then be browsed interactively, displaying detected deals with their segmentation masks overlaid on the original pages. This feature provides direct insights into the model’s performance, allowing users to verify the accuracy of detected promotions and extracted information. The efficiency of the application benefits from YOLO’s lightweight architecture, ensuring that leaflet processing remains fast and responsive. After a short processing time, users can navigate through detected deals and inspect the segmentation masks applied to the leaflet images. Clicking on an individual deal reveals extracted details such as the product name, price, and other metadata. The combination of automated deal extraction and interactive visualization makes the web application a practical tool for structured deal exploration and comparison.
+Beyond static deal browsing, the application also incorporates an upload feature that enables users to submit entire supermarket leaflets for processing. When a leaflet is uploaded, the system applies the full processing pipeline, from deal detection using YOLO to information extraction. The processed leaflet can then be browsed interactively, displaying detected deals with their segmentation masks overlaid on the original pages. This feature provides direct insights into the models performance, allowing users to verify the accuracy of detected promotions and extracted information. The efficiency of the application benefits from  lightweight architecture from YOLO, ensuring that leaflet processing remains fast and responsive. After a short processing time, users can navigate through detected deals and inspect the segmentation masks applied to the leaflet images. Clicking on an individual deal reveals extracted details such as the product name, price, and other metadata. The combination of automated deal extraction and interactive visualization makes the web application a practical tool for structured deal exploration and comparison.
 
 \section{Conclusion}
 \label{sec:conclusion}
     \subsection{Summary}
-    This work presents a comprehensive approach to the digitalization and structuring of supermarket leaflet information. The proposed modular pipeline encompasses deal detection and information extraction, transforming raw leaflet data into structured, actionable insights. The deal detection module leverages advanced YOLO-based models to accurately identify and segment deals within leaflets, while the information extraction module employs state-of-the-art OCR, LLM, and end-to-end models to extract and normalize deal attributes. The developed interactive application, backed by a robust database, allows users to browse, filter, and compare deals across multiple supermarket chains, providing a proof of concept for practical applications. Additionally, the research contributes two datasets: one for deal detection as instance segmentation and another for image-based information extraction, facilitating further research in this domain.
+    This work presents a comprehensive approach to the digitalization and structuring of supermarket leaflet deals. The proposed modular pipeline encompasses deal detection and information extraction, transforming raw leaflet data into structured data. The deal detection module leverages lightweight and efficient YOLO-based models to accurately identify and segment deals within leaflets, while the information extraction module employs state-of-the-art OCR, LLM, and end-to-end models to extract and normalize deal attributes. The developed interactive application, backed by a robust database, allows users to browse, filter, and compare deals across multiple supermarket chains, providing a proof of concept for practical applications. Additionally, the research contributes two datasets: one for deal detection as instance segmentation and another for image-based information extraction, facilitating further research in this domain.
 
     \subsection{Future Work}
     This project opens up several avenues for future research and development to enhance the system's capabilities and usability.
 
-    Firstly, enhancing the performance and runtime of the deal detection module is crucial. This involves optimizing the existing YOLO-based model and exploring alternative architectures that may offer better accuracy and efficiency.
+    Firstly, enhancing the performance and runtime of the deal detection module is crucial. This involves optimizing the existing YOLO-based model and exploring alternative architectures that may offer better accuracy and efficiency. Also, the size of the dataset can be increased by including more leaflets from different supermarkets, which would improve the model's generalization capabilities.
 
-    Secondly, the information extraction (IE) component can be significantly improved by building a larger dataset specifically for training the Donut model. Given the promising results achieved with Donut, expanding the dataset and fine-tuning the model further could yield competitive results in extracting structured information from supermarket leaflets.
+    Secondly, the IE component can be significantly improved by building a larger dataset specifically for training the Donut model. Given the promising results achieved with Donut, expanding the dataset and fine-tuning the model further could yield competitive results in extracting structured information from supermarket leaflets.
 
-    Additionally, several new branches of research and development can be pursued. These include the deal specification and product image extraction to build a comprehensive database, brand and product name normalization for database mapping, and time series analysis for price trend prediction. On the application side, scalability, frontend improvements, and additional features such as a recommendation engine and automatic weekly deal extraction can enhance user experience and system robustness.
+    Additionally, several new branches of research and development can be pursued. These include the deal specification and product image extraction to build a comprehensive database, brand and product name normalization for database mapping, and time series analysis for price trend prediction. On the application side, scalability, frontend improvements, and additional features such as a recommendation engine and automatic weekly deal extraction can enhance user experience and system robustness. There are numerous possibilities for future work and the project serves as a foundation for further exploration in the field of supermarket deal extraction based on leaflets.
 
 \bibliography{references}
 \newpage
