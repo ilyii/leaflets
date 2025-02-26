@@ -38,6 +38,19 @@ Yuning Du, Chenxia Li, Ruoyu Guo, Cheng Cui, Weiwei Liu, Jun Zhou, Bin Lu,
   Yehua Yang, Qiwen Liu, Xiaoguang Hu, Dianhai Yu, and Yanjun Ma.
 \newblock Pp-ocrv2: Bag of tricks for ultra lightweight ocr system, 2021.
 
+\bibitem{girshickFastRCNN2015}
+Ross Girshick.
+\newblock Fast {{R-CNN}}, 2015.
+
+\bibitem{girshickRichFeatureHierarchies2014a}
+Ross Girshick, Jeff Donahue, Trevor Darrell, and Jitendra Malik.
+\newblock Rich feature hierarchies for accurate object detection and semantic
+  segmentation, 2014.
+
+\bibitem{heMaskRCNN2018}
+Kaiming He, Georgia Gkioxari, Piotr Doll{\'a}r, and Ross Girshick.
+\newblock Mask {{R-CNN}}, 2018.
+
 \bibitem{easyocr}
 JaidedAI.
 \newblock Easyocr: Ready-to-use ocr with 80+ languages supported including
@@ -81,6 +94,10 @@ Minghui Liao, Zhisheng Zou, Zhaoyi Wan, Cong Yao, and Xiang Bai.
 Mindee.
 \newblock Doctr: Document ocr and text recognition.
 
+\bibitem{mohamedINSTAYOLORealTimeInstance2024}
+Eslam Mohamed, Abdelrahman Shaker, Ahmad {El-Sallab}, and Mayada Hadhoud.
+\newblock {{INSTA-YOLO}}: {{Real-Time Instance Segmentation}}, 2024.
+
 \bibitem{nandkumar2024}
 Chandran Nandkumar and Luka Peternel.
 \newblock Enhancing supermarket robot interaction: A multi-level llm
@@ -110,6 +127,16 @@ Qwen, :, An~Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo~Zheng, Bowen Yu,
   Yuqiong Liu, Zeyu Cui, Zhenru Zhang, and Zihan Qiu.
 \newblock Qwen2.5 technical report, 2025.
 
+\bibitem{redmonYouOnlyLook2016}
+Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi.
+\newblock You {{Only Look Once}}: {{Unified}}, {{Real-Time Object Detection}},
+  2016.
+
+\bibitem{renFasterRCNNRealTime2016}
+Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun.
+\newblock Faster {{R-CNN}}: {{Towards Real-Time Object Detection}} with
+  {{Region Proposal Networks}}, 2016.
+
 \bibitem{shi2015}
 Baoguang Shi, Xiang Bai, and Cong Yao.
 \newblock An end-to-end trainable neural network for image-based sequence
@@ -135,6 +162,11 @@ Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne
   Faisal Azhar, Aurelien Rodriguez, Armand Joulin, Edouard Grave, and Guillaume
   Lample.
 \newblock Llama: Open and efficient foundation language models, 2023.
+
+\bibitem{uijlingsSelectiveSearchObject2013}
+J.~R.~R. Uijlings, K.~E.~A. Van De~Sande, T.~Gevers, and A.~W.~M. Smeulders.
+\newblock Selective {{Search}} for {{Object Recognition}}.
+\newblock {\em International Journal of Computer Vision}, 104:154--171, 2013.
 
 \bibitem{vaswani2017}
 Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
@@ -176,5 +208,15 @@ Guoping Zhao, Jiajun Liu, Jiacheng Jiang, Hua Guan, and Ji-Rong Wen.
   document images.
 \newblock In {\em 2018 24th International Conference on Pattern Recognition
   (ICPR)}, pages 2935--2940, 2018.
+
+\bibitem{zhaoDETRsBeatYOLOs2024a}
+Yian Zhao, Wenyu Lv, Shangliang Xu, Jinman Wei, Guanzhong Wang, Qingqing Dang,
+  Yi~Liu, and Jie Chen.
+\newblock {{DETRs Beat YOLOs}} on {{Real-time Object Detection}}, 2024.
+
+\bibitem{zhuDeformableDETRDeformable2021}
+Xizhou Zhu, Weijie Su, Lewei Lu, Bin Li, Xiaogang Wang, and Jifeng Dai.
+\newblock Deformable {{DETR}}: {{Deformable Transformers}} for {{End-to-End
+  Object Detection}}, 2021.
 
 \end{thebibliography}
