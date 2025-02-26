@@ -1,11 +1,5 @@
 \begin{thebibliography}{10}
 
-\bibitem{easyocr}
-
-
-\bibitem{doctr}
-
-
 \bibitem{appalaraju2021}
 Srikar Appalaraju, Bhavan Jasani, Bhargava~Urala Kota, Yusheng Xie, and
   R.~Manmatha.
@@ -44,6 +38,11 @@ Yuning Du, Chenxia Li, Ruoyu Guo, Cheng Cui, Weiwei Liu, Jun Zhou, Bin Lu,
   Yehua Yang, Qiwen Liu, Xiaoguang Hu, Dianhai Yu, and Yanjun Ma.
 \newblock Pp-ocrv2: Bag of tricks for ultra lightweight ocr system, 2021.
 
+\bibitem{easyocr}
+JaidedAI.
+\newblock Easyocr: Ready-to-use ocr with 80+ languages supported including
+  chinese, japanese, korean and thai.
+
 \bibitem{kim2022}
 Geewook Kim, Teakgyu Hong, Moonbin Yim, Jeongyeon Nam, Jinyoung Park, Jinyeong
   Yim, Wonseok Hwang, Sangdoo Yun, Dongyoon Han, and Seunghyun Park.
@@ -77,6 +76,10 @@ Minghui Liao, Zhaoyi Wan, Cong Yao, Kai Chen, and Xiang Bai.
 Minghui Liao, Zhisheng Zou, Zhaoyi Wan, Cong Yao, and Xiang Bai.
 \newblock Real-time scene text detection with differentiable binarization and
   adaptive scale fusion, 2022.
+
+\bibitem{doctr}
+Mindee.
+\newblock Doctr: Document ocr and text recognition.
 
 \bibitem{nandkumar2024}
 Chandran Nandkumar and Luka Peternel.

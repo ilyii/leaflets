@@ -5,40 +5,38 @@ Reallocating 'name_of_file' (item size: 1) to 6 items.
 The style file: plain.bst
 Reallocating 'name_of_file' (item size: 1) to 11 items.
 Database file #1: references.bib
-Warning--to sort, need author or key in easyocr
-Warning--to sort, need author or key in doctr
 Warning--empty journal in liao2019
 Warning--there's a number but no volume in liao2019
 You've used 28 entries,
             2118 wiz_defined-function locations,
-            605 strings with 11036 characters,
-and the built_in function-call counts, 14178 in all, are:
-= -- 1094
-> -- 1444
+            608 strings with 11183 characters,
+and the built_in function-call counts, 14290 in all, are:
+= -- 1110
+> -- 1456
 < -- 4
-+ -- 577
-- -- 546
++ -- 581
+- -- 550
 * -- 1273
-:= -- 2467
-add.period$ -- 61
+:= -- 2507
+add.period$ -- 63
 call.type$ -- 28
-change.case$ -- 355
+change.case$ -- 359
 chr.to.int$ -- 0
-cite$ -- 32
+cite$ -- 30
 duplicate$ -- 259
-empty$ -- 694
-format.name$ -- 546
-if$ -- 2707
+empty$ -- 692
+format.name$ -- 550
+if$ -- 2725
 int.to.chr$ -- 0
 int.to.str$ -- 28
 missing$ -- 6
-newline$ -- 120
-num.names$ -- 52
+newline$ -- 122
+num.names$ -- 56
 pop$ -- 471
 preamble$ -- 1
-purify$ -- 329
+purify$ -- 331
 quote$ -- 0
-skip$ -- 271
+skip$ -- 267
 stack$ -- 0
 substring$ -- 303
 swap$ -- 62
@@ -46,8 +44,8 @@ text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 112
-warning$ -- 4
-while$ -- 60
+warning$ -- 2
+while$ -- 64
 width$ -- 30
-write$ -- 238
-(There were 4 warnings)
+write$ -- 244
+(There were 2 warnings)
