@@ -1,0 +1,15 @@
+model_path: "yolov8m-seg.pt"
+data_path: "data/data-seg.yaml"
+epochs: 30
+batch: 16
+imgsz: 640
+cache: true
+
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+degrees: 0.0
+translate: 0.1
+scale: 0.0
+shear: 0.0
+fliplr: 0.0

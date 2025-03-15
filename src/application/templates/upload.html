@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card upload-card">
+    <h2>Prospekt hochladen</h2>
+    <form id="uploadForm">
+        <div class="form-group">
+            <input type="file" id="pdfFile" name="file" accept="application/pdf" required>
+        </div>
+        <button type="submit" class="btn">Hochladen</button>
+    </form>
+    <div id="result"></div>
+    <!-- Loader -->
+    <div id="loader" class="loader-overlay" style="display: none;">
+        <div class="loader-spinner"></div>
+        <p>Bitte warten, PDF wird verarbeitet ...</p>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("uploadForm");
+    const loader = document.getElementById("loader");
+    const resultDiv = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById("pdfFile");
+        if (!fileInput.files.length) return;
+
+        // show loader
+        loader.style.display = "block";
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        try {
+            const res = await fetch("/api/upload_pdf", {
+                method: "POST",
+                body: formData
+            });
+            // wait for response
+            const data = await res.json();
+
+            // finish loader
+            loader.style.display = "none";
+
+            if (data.session_id) {
+                // when a session ID is received, redirect to preview page
+                window.location.href = `/preview?session_id=${data.session_id}`;
+            } else {
+                resultDiv.textContent = "Fehler: Keine Session ID erhalten.";
+            }
+        } catch (err) {
+            console.error(err);
+            loader.style.display = "none";
+            resultDiv.textContent = "Upload fehlgeschlagen.";
+        }
+    });
+</script>
+{% endblock %}

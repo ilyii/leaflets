@@ -1,0 +1,55 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Deals Übersicht</h2>
+
+<input type="text" id="searchInput" placeholder="Suche nach Produktname..." />
+<button onclick="fetchDeals()">Suchen</button>
+
+<label>
+    <input type="checkbox" id="metadataOnly" onchange="fetchDeals()" checked="True" />
+    Nur Deals mit Metadaten
+</label>
+
+<select id="supermarketSelect" onchange="fetchDeals()">
+    <option value="">Alle Supermärkte</option>
+    {% for supermarket in supermarkets %}
+    <option value="{{ supermarket }}">{{ supermarket }}</option>
+    {% endfor %}
+</select>
+
+<label>
+    <input type="checkbox" id="validOnly" onchange="fetchDeals()" />
+    Nur aktuell gültige
+</label>
+
+<label>
+    <input type="checkbox" id="sortByDate" onchange="fetchDeals()" />
+    Nach Datum sortieren
+</label>
+
+<div id="dealsContainer" class="grid-container">
+    <!-- deal-cards will be inserted here -->
+</div>
+
+<div id="paginationArea">
+    <button onclick="prevPage()">Zurück</button>
+    <span id="pageNum">1</span>
+    <button onclick="nextPage()">Weiter</button>
+</div>
+
+<script src="/static/js/app.js"></script>
+
+<!-- Deal Modal -->
+<div id="dealModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeDealModal" class="close">&times;</span>
+        <div id="dealModalContent">
+            <!-- More details will be inserted here -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}

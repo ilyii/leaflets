@@ -1,0 +1,4 @@
+    # text = text.replace("ä", "a").replace("ö", "o").replace("ü", "u").replace("ß", "ss")
+    # text = text.replace(",", ".").replace("€", "").replace("-", " ").replace("–", " ").replace("—", " ").replace("−", " ")
+    # text = "".join(text.split())
+    # text = text.strip().lower()
