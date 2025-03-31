@@ -1,3 +1,4 @@
+import torch
 from fastapi import FastAPI, Request, File, UploadFile, Form
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -23,7 +24,7 @@ SEGMENTATION_CACHE = {}
 load_dotenv(override=True)
 
 PROJECT_DIR = os.getenv("PROJECT_DIR", ".")
-DB_PATH = os.path.join(PROJECT_DIR, "crawled_leaflets", "supermarket_leaflets.db")
+DB_PATH = os.path.join(PROJECT_DIR, "supermarket_leaflets.db")
 MODELS_DIR = os.path.join(PROJECT_DIR, "models")
 DEALS_DIR = os.path.join(PROJECT_DIR, "deals")
 
@@ -182,7 +183,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             iou=0.4,
             conf=0.5,
             # half=True,
-            device="cuda:0",
+            device="cuda:0" if torch.cuda.is_available() else "cpu",
             verbose=False
         )
 
@@ -296,7 +297,7 @@ async def process_deal(request: Request):
     # Use process_image to extract structured deal info from the cropped image
     # deal_info = process_image(crop_path, model="llama3.2-vision")
     # deal_info = process_image(crop_path, model="llama3.2-vision:11b-instruct-q8_0")
-    deal_info = process_image(crop_path, model="minicpm-v")
+    deal_info = process_image(crop_path, model="minicpm-v:latest")
     # deal_info = {}
     extracted_info = f"""
     Brand: {deal_info.get("brand", "unknown")}<br>
